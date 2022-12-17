@@ -7,10 +7,11 @@ class Point {
   double w;
   Offset control;
 
-  Point(
-      {this.x = 0,
-      this.y = 0,
-      this.a = 0,
-      this.w = 0,
-      this.control = const Offset(0, 0)});
+  Point({
+    this.x = 0,
+    this.y = 0,
+    this.a = 0,
+    this.w = 0,
+    this.control = const Offset(0, 0),
+  });
 }

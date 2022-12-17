@@ -8,6 +8,22 @@ import 'package:speed/utils/load.dart';
 import 'package:speed/utils/point.dart';
 import 'dart:ui' as ui;
 
+// 规划模式
+enum CType {
+  path('path'),
+  speed('speed');
+
+  final String name;
+  const CType(this.name);
+
+  static CType parse(String name) {
+    return values.firstWhere(
+      (v) => v.name == name,
+      orElse: () => CType.path,
+    );
+  }
+}
+
 class Global extends ChangeNotifier {
   Global() {
     addPoints(Point(x: 100, y: 100));
@@ -53,6 +69,13 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  CType _cType = CType.path;
+  CType get cType => _cType;
+  set cType(CType cType) {
+    _cType = cType;
+    notifyListeners();
+  }
+
   String? _imagePath;
   ui.Image? image;
   String? get imagePath {
@@ -85,6 +108,8 @@ class Global extends ChangeNotifier {
   final TextEditingController yController = TextEditingController();
   final TextEditingController dController = TextEditingController();
   final TextEditingController tController = TextEditingController();
+  final TextEditingController wController = TextEditingController();
+  final TextEditingController aController = TextEditingController();
 
   final List<Point> points = [];
   final List<Rect> rects = [];
@@ -177,6 +202,12 @@ class Global extends ChangeNotifier {
                 Offset(point.x + point.control.dx, point.y + point.control.dy),
             radius: 6);
         break;
+      case 4:
+        points[selectedIndex].w = value;
+        break;
+      case 5:
+        points[selectedIndex].a = value;
+        break;
     }
 
     notifyListeners();
@@ -188,6 +219,8 @@ class Global extends ChangeNotifier {
       yController.text = '';
       dController.text = '';
       tController.text = '';
+      wController.text = '';
+      aController.text = '';
     } else {
       xController.text = (points[index].x * resolution).toString();
       yController.text = (points[index].y * resolution).toString();
@@ -195,6 +228,8 @@ class Global extends ChangeNotifier {
           (points[index].control.distance * resolution).toString();
       tController.text =
           (points[index].control.direction / pi * 180).toString();
+      wController.text = points[index].w.toString();
+      aController.text = points[index].a.toString();
     }
   }
 
@@ -259,8 +294,6 @@ class Global extends ChangeNotifier {
     }
 
     ui.PathMetric p = path.computeMetrics().elementAt(0);
-    double theta = p.getTangentForOffset(0)!.angle;
-    double speed = tan(theta);
     return p;
   }
 
@@ -298,6 +331,8 @@ class Global extends ChangeNotifier {
     yController.dispose();
     dController.dispose();
     tController.dispose();
+    wController.dispose();
+    aController.dispose();
     image?.dispose();
     super.dispose();
   }

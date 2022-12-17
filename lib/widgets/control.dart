@@ -36,7 +36,9 @@ class ControlWidget extends StatelessWidget {
       TextEditingController x,
       TextEditingController y,
       TextEditingController d,
-      TextEditingController t) {
+      TextEditingController t,
+      TextEditingController w,
+      TextEditingController a) {
     return [
       const SizedBox(height: 20),
       Row(
@@ -70,7 +72,7 @@ class ControlWidget extends StatelessWidget {
         children: [
           Expanded(
             child: TextBox(
-              header: 'Distance(mm)',
+              header: 'Lambda(mm)',
               placeholder: 'mm',
               enabled: enabled,
               controller: d,
@@ -85,6 +87,33 @@ class ControlWidget extends StatelessWidget {
               enabled: enabled,
               controller: t,
               onSubmitted: (value) => onUpdate(3, value),
+              inputFormatters: [XNumberTextInputFormatter()],
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
+      const Text('其他数值'),
+      const SizedBox(height: 20),
+      Row(
+        children: [
+          Expanded(
+            child: TextBox(
+              header: 'w',
+              placeholder: '角速度',
+              enabled: enabled,
+              controller: w,
+              onSubmitted: (value) => onUpdate(4, value),
+              inputFormatters: [XNumberTextInputFormatter()],
+            ),
+          ),
+          Expanded(
+            child: TextBox(
+              header: 'a',
+              placeholder: '加速度',
+              enabled: enabled,
+              controller: a,
+              onSubmitted: (value) => onUpdate(5, value),
               inputFormatters: [XNumberTextInputFormatter()],
             ),
           ),
@@ -123,13 +152,24 @@ class ControlWidget extends StatelessWidget {
           const SizedBox(height: 20),
           Card(
             child: SizedBox(
-              height: 260,
+              height: 400,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ListTile(
                     leading: const Icon(FluentIcons.location),
-                    title: const Text('位置'),
+                    title: ComboBox(
+                      value: global.cType.name,
+                      items: CType.values
+                          .map((e) => ComboBoxItem(
+                                value: e.name,
+                                child: Text(e.name),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) global.cType = CType.parse(value);
+                      },
+                    ),
                     subtitle: Text('第${global.selectedIndex + 1}个点'),
                     trailing: Row(
                       children: [
@@ -171,8 +211,13 @@ class ControlWidget extends StatelessWidget {
                       return;
                     }
                     global.setPoints(type, double.parse(value));
-                  }, global.xController, global.yController, global.dController,
-                      global.tController),
+                  },
+                      global.xController,
+                      global.yController,
+                      global.dController,
+                      global.tController,
+                      global.wController,
+                      global.aController),
                 ],
               ),
             ),
