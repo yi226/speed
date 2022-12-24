@@ -97,6 +97,28 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  double get slideValue => selectedSIndex == -1 ? 0 : sPoints[selectedSIndex].t;
+  set slideValue(double value) {
+    if (selectedSIndex == -1) {
+      return;
+    }
+    sPoints[selectedSIndex].t = value;
+    updateSController();
+    notifyListeners();
+  }
+
+  updateSController() {
+    if (selectedSIndex == -1) {
+      return;
+    }
+    var p = _getPoint(
+        sPoints[selectedSIndex].pointIndex, sPoints[selectedSIndex].t);
+    xSController.text = p.position.dx.toString();
+    ySController.text = p.position.dy.toString();
+    tSController.text = (p.angle / pi * 180).toString();
+    notifyListeners();
+  }
+
   bool _settingSave = false;
   bool get settingSave => _settingSave;
   set settingSave(bool s) {
@@ -110,6 +132,11 @@ class Global extends ChangeNotifier {
   final TextEditingController tController = TextEditingController();
   final TextEditingController wController = TextEditingController();
   final TextEditingController aController = TextEditingController();
+
+  final TextEditingController xSController = TextEditingController();
+  final TextEditingController ySController = TextEditingController();
+  final TextEditingController tSController = TextEditingController();
+  final TextEditingController sController = TextEditingController();
 
   final List<Point> points = [];
   final List<Rect> rects = [];
@@ -233,6 +260,40 @@ class Global extends ChangeNotifier {
     }
   }
 
+  final List<SpeedPoint> sPoints = [];
+
+  addSPoint() {
+    SpeedPoint sPoint = SpeedPoint(pointIndex: selectedIndex);
+    if (selectedIndex == points.length - 1) {
+      sPoint.pointIndex = selectedIndex - 1;
+      sPoint.t = 1;
+    }
+    sPoints.add(sPoint);
+    selectedSIndex = sPoints.length - 1;
+    updateSController();
+    notifyListeners();
+  }
+
+  setSPoint(double speed) {
+    sPoints[selectedSIndex].speed = speed;
+    notifyListeners();
+  }
+
+  deleteSPoints(int index) {
+    sPoints.removeAt(index);
+    if (selectedSIndex > sPoints.length - 1) {
+      selectedSIndex = sPoints.length - 1;
+    }
+    notifyListeners();
+  }
+
+  int _selectedSIndex = -1;
+  int get selectedSIndex => _selectedSIndex;
+  set selectedSIndex(int index) {
+    _selectedSIndex = index;
+    notifyListeners();
+  }
+
   Size _canvasSize = const Size(500, 500);
   Size get canvasSize => _canvasSize;
   set canvasSize(Size size) {
@@ -278,23 +339,20 @@ class Global extends ChangeNotifier {
     }
   }
 
-  ui.PathMetric get getPathMatrix {
-    var path = ui.Path();
+  ui.Tangent _getPoint(int i, double t) {
+    var path = Path();
 
-    path.moveTo(points[0].x, points[0].y);
-
-    for (var i = 0; i < points.length - 1; i++) {
-      var x1 = points[i].x + points[i].control.dx;
-      var y1 = points[i].y + points[i].control.dy;
-      var x2 = points[i + 1].x - points[i + 1].control.dx;
-      var y2 = points[i + 1].y - points[i + 1].control.dy;
-      var x3 = points[i + 1].x;
-      var y3 = points[i + 1].y;
-      path.cubicTo(x1, y1, x2, y2, x3, y3);
-    }
+    path.moveTo(points[i].x, points[i].y);
+    var x1 = points[i].x + points[i].control.dx;
+    var y1 = points[i].y + points[i].control.dy;
+    var x2 = points[i + 1].x - points[i + 1].control.dx;
+    var y2 = points[i + 1].y - points[i + 1].control.dy;
+    var x3 = points[i + 1].x;
+    var y3 = points[i + 1].y;
+    path.cubicTo(x1, y1, x2, y2, x3, y3);
 
     ui.PathMetric p = path.computeMetrics().elementAt(0);
-    return p;
+    return p.getTangentForOffset(t * p.length)!;
   }
 
   Future<String?> get(String key) async {
@@ -333,6 +391,10 @@ class Global extends ChangeNotifier {
     tController.dispose();
     wController.dispose();
     aController.dispose();
+    xSController.dispose();
+    ySController.dispose();
+    tSController.dispose();
+    sController.dispose();
     image?.dispose();
     super.dispose();
   }

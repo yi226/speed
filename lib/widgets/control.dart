@@ -147,82 +147,201 @@ class ControlWidget extends StatelessWidget {
     final global = context.watch<Global>();
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ListView(
-        children: [
-          const SizedBox(height: 20),
-          Card(
-            child: SizedBox(
-              height: 400,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: const Icon(FluentIcons.location),
+              title: Text(global.cType.name),
+              subtitle: Text('第${global.selectedIndex + 1}个点'),
+              trailing: Row(
                 children: [
-                  ListTile(
-                    leading: const Icon(FluentIcons.location),
-                    title: ComboBox(
-                      value: global.cType.name,
-                      items: CType.values
-                          .map((e) => ComboBoxItem(
-                                value: e.name,
-                                child: Text(e.name),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) global.cType = CType.parse(value);
-                      },
-                    ),
-                    subtitle: Text('第${global.selectedIndex + 1}个点'),
-                    trailing: Row(
-                      children: [
-                        FilledButton(
-                          style: ButtonStyle(
-                              backgroundColor: ButtonState.all(
-                                  global.selectedIndex != -1
-                                      ? Colors.red
-                                      : Colors.grey)),
-                          onPressed: () async {
-                            if (global.selectedIndex == -1) {
-                              return;
-                            }
-                            final result = await showAlert(context);
-                            if (result == true) {
-                              global.deletePoints(global.selectedIndex);
-                            }
-                          },
-                          child: const Text('删除'),
-                        ),
-                        const SizedBox(width: 30),
-                        FilledButton(
-                          onPressed: (() => addPoint(global)),
-                          child: const Text('在此后加点'),
-                        ),
-                        const SizedBox(width: 30),
-                        FilledButton(
-                          onPressed: () {
-                            global.canvasOffset = Offset.zero;
-                          },
-                          child: const Text('图片归位'),
-                        ),
-                      ],
-                    ),
+                  FilledButton(
+                    style: ButtonStyle(
+                        backgroundColor: ButtonState.all(
+                            global.selectedIndex != -1
+                                ? Colors.red
+                                : Colors.grey)),
+                    onPressed: () async {
+                      if (global.selectedIndex == -1) {
+                        return;
+                      }
+                      final result = await showAlert(context);
+                      if (result == true) {
+                        global.deletePoints(global.selectedIndex);
+                      }
+                    },
+                    child: const Text('删除'),
                   ),
-                  ...inputWidget(global.selectedIndex != -1,
-                      (int type, String value) {
-                    if (value.isEmpty) {
-                      return;
-                    }
-                    global.setPoints(type, double.parse(value));
-                  },
-                      global.xController,
-                      global.yController,
-                      global.dController,
-                      global.tController,
-                      global.wController,
-                      global.aController),
+                  const SizedBox(width: 30),
+                  FilledButton(
+                    onPressed: (() => addPoint(global)),
+                    child: const Text('在此后加点'),
+                  ),
+                  const SizedBox(width: 30),
+                  FilledButton(
+                    onPressed: () {
+                      global.canvasOffset = Offset.zero;
+                    },
+                    child: const Text('图片归位'),
+                  ),
                 ],
               ),
             ),
+            ...inputWidget(global.selectedIndex != -1,
+                (int type, String value) {
+              if (value.isEmpty) {
+                return;
+              }
+              global.setPoints(type, double.parse(value));
+            }, global.xController, global.yController, global.dController,
+                global.tController, global.wController, global.aController),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SControlWidget extends StatelessWidget {
+  const SControlWidget({super.key});
+
+  List<Widget> inputWidget(x, y, theta, s, func) {
+    return [
+      Row(
+        children: [
+          Expanded(
+            child: TextBox(
+              header: 'X(mm)',
+              placeholder: 'mm',
+              controller: x,
+              readOnly: true,
+            ),
+          ),
+          Expanded(
+            child: TextBox(
+              header: 'Y(mm)',
+              placeholder: 'mm',
+              controller: y,
+              readOnly: true,
+            ),
           ),
         ],
+      ),
+      const SizedBox(height: 20),
+      TextBox(
+        header: 'Theta',
+        placeholder: 'o',
+        controller: theta,
+        readOnly: true,
+      ),
+      const SizedBox(height: 20),
+      TextBox(
+        header: 'Speed',
+        placeholder: 'mm/s',
+        controller: s,
+        onSubmitted: (value) {
+          if (value.isNotEmpty) {
+            double v = double.parse(value);
+            func.call(v);
+          }
+        },
+        inputFormatters: [XNumberTextInputFormatter()],
+      ),
+      const SizedBox(height: 20),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final global = context.watch<Global>();
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: const Icon(FluentIcons.location),
+              title: Text(global.cType.name),
+              subtitle: Text('第${global.selectedSIndex + 1}个点'),
+              trailing: Row(
+                children: [
+                  FilledButton(
+                    onPressed: () {
+                      global.addSPoint();
+                    },
+                    child: Text('第${global.selectedIndex + 1}个路径点添加速度点'),
+                  ),
+                  const SizedBox(width: 20),
+                  FilledButton(
+                    onPressed: () {
+                      global.canvasOffset = Offset.zero;
+                    },
+                    child: const Text('图片归位'),
+                  ),
+                ],
+              ),
+            ),
+            ...inputWidget(global.xSController, global.ySController,
+                global.tSController, global.sController, global.setSPoint),
+            Text(global.slideValue.toString()),
+            Slider(
+              value: global.slideValue,
+              onChanged: (v) => global.slideValue = v,
+              max: 1.0,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                FilledButton(
+                  onPressed: () {
+                    global.selectedSIndex = -1;
+                  },
+                  child: const Text('确认'),
+                ),
+                const SizedBox(width: 20),
+                FilledButton(
+                  style: ButtonStyle(
+                      backgroundColor: ButtonState.all(
+                          global.selectedSIndex != -1
+                              ? Colors.red
+                              : Colors.grey)),
+                  onPressed: () {
+                    if (global.selectedSIndex == -1) {
+                      return;
+                    }
+                    global.deleteSPoints(global.selectedSIndex);
+                  },
+                  child: const Text('删除'),
+                ),
+                const SizedBox(width: 20),
+                Button(
+                  onPressed: () {
+                    global.selectedSIndex -= 1;
+                    if (global.selectedSIndex < 0) {
+                      global.selectedSIndex = global.sPoints.length - 1;
+                    }
+                    global.updateSController();
+                  },
+                  child: const Text('上一个'),
+                ),
+                const SizedBox(width: 10),
+                Button(
+                  onPressed: () {
+                    global.selectedSIndex += 1;
+                    if (global.selectedSIndex > global.sPoints.length - 1) {
+                      global.selectedSIndex = -1;
+                    }
+                    global.updateSController();
+                  },
+                  child: const Text('下一个'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

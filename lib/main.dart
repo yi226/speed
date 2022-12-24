@@ -118,6 +118,21 @@ class _MainPageState extends State<MainPage> {
               CommandBarButton(
                   label: const Text("测试(T)"),
                   onPressed: () => global.showError('Test')),
+              const CommandBarSeparator(),
+              CommandBarButton(
+                  label: ComboBox(
+                    value: global.cType.name,
+                    items: CType.values
+                        .map((e) => ComboBoxItem(
+                              value: e.name,
+                              child: Text(e.name),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) global.cType = CType.parse(value);
+                    },
+                  ),
+                  onPressed: () {}),
             ],
           ),
         ),
@@ -134,10 +149,15 @@ class _MainPageState extends State<MainPage> {
               icon: const Icon(FluentIcons.file_image),
               title: const Text('Speed Plan'),
               body: Row(
-                children: const [
-                  CurveWidget(),
-                  Expanded(child: ControlWidget())
-                ],
+                children: global.cType == CType.path
+                    ? [
+                        const CurveWidget(),
+                        const Expanded(child: ControlWidget())
+                      ]
+                    : [
+                        const SCurveWidget(),
+                        const Expanded(child: SControlWidget())
+                      ],
               )),
         ],
         footerItems: [
