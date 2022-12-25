@@ -97,7 +97,12 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
-  double get slideValue => selectedSIndex == -1 ? 0 : sPoints[selectedSIndex].t;
+  double get slideValue {
+    tTController.text =
+        (selectedSIndex == -1 ? 0 : sPoints[selectedSIndex].t).toString();
+    return selectedSIndex == -1 ? 0 : sPoints[selectedSIndex].t;
+  }
+
   set slideValue(double value) {
     if (selectedSIndex == -1) {
       return;
@@ -137,6 +142,7 @@ class Global extends ChangeNotifier {
   final TextEditingController ySController = TextEditingController();
   final TextEditingController tSController = TextEditingController();
   final TextEditingController sController = TextEditingController();
+  final TextEditingController tTController = TextEditingController();
 
   final List<Point> points = [];
   final List<Rect> rects = [];
@@ -395,6 +401,7 @@ class Global extends ChangeNotifier {
     ySController.dispose();
     tSController.dispose();
     sController.dispose();
+    tTController.dispose();
     image?.dispose();
     super.dispose();
   }

@@ -286,7 +286,21 @@ class SControlWidget extends StatelessWidget {
             ),
             ...inputWidget(global.xSController, global.ySController,
                 global.tSController, global.sController, global.setSPoint),
-            Text(global.slideValue.toString()),
+            TextBox(
+              header: 't',
+              placeholder: '0~1',
+              controller: global.tTController,
+              onSubmitted: (value) {
+                if (value.isNotEmpty) {
+                  double v = double.parse(value);
+                  if (v > 1) {
+                    v = 1;
+                  }
+                  global.slideValue = v;
+                }
+              },
+              inputFormatters: [XNumberTextInputFormatter()],
+            ),
             Slider(
               value: global.slideValue,
               onChanged: (v) => global.slideValue = v,
