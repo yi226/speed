@@ -269,6 +269,10 @@ class Global extends ChangeNotifier {
   final List<SpeedPoint> sPoints = [];
 
   addSPoint() {
+    if (selectedIndex == -1) {
+      showError('请先规划路径');
+      return;
+    }
     SpeedPoint sPoint = SpeedPoint(pointIndex: selectedIndex);
     if (selectedIndex == points.length - 1) {
       sPoint.pointIndex = selectedIndex - 1;
