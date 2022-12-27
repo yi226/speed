@@ -278,7 +278,8 @@ class SControlWidget extends StatelessWidget {
             ListTile(
               leading: const Icon(FluentIcons.location),
               title: Text(global.cType.name),
-              subtitle: Text('第${global.selectedSIndex + 1}个点'),
+              subtitle: Text(
+                  '第${global.selectedSIndex + 1}/${global.sPoints.length}个点'),
               trailing: Row(
                 children: [
                   FilledButton(

@@ -98,8 +98,7 @@ class _MainPageState extends State<MainPage> {
                           Button(
                             child: const Text('保存配置'),
                             onPressed: () async {
-                              await global.save('Settings',
-                                  '${global.mode == ThemeMode.dark}@${global.imagePath}@${global.canvasSize.height}@${global.resolution}');
+                              await global.save('Settings', global.saveString);
                               global.settingSave = true;
                             },
                           ),
@@ -116,7 +115,7 @@ class _MainPageState extends State<MainPage> {
                   }),
               CommandBarButton(
                   label: const Text("生成(C)"),
-                  onPressed: () => global.reOrderSPoint()),
+                  onPressed: () => global.createPath()),
               CommandBarButton(
                   label: const Text("报告(R)"),
                   onPressed: () => global.showError('未完成')),

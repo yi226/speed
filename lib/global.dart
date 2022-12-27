@@ -42,6 +42,7 @@ class Global extends ChangeNotifier {
       _imagePath = setList[1] == 'null' ? null : setList[1];
       _canvasSize = Size(500, double.parse(setList[2]));
       _resolution = double.parse(setList[3]);
+      robotWidthController.text = setList[4];
       if (_imagePath != null) {
         try {
           image = await loadImage(_imagePath!,
@@ -52,13 +53,15 @@ class Global extends ChangeNotifier {
           showError(e.toString());
           _imagePath = null;
           image = null;
-          await save('Settings',
-              '${mode == ThemeMode.dark}@$imagePath@${canvasSize.height}@$resolution');
+          await save('Settings', saveString);
         }
       }
     }
     notifyListeners();
   }
+
+  String get saveString =>
+      '${mode == ThemeMode.dark}@$imagePath@${canvasSize.height}@$resolution@$robotWidth';
 
   BuildContext? context;
 
@@ -146,6 +149,10 @@ class Global extends ChangeNotifier {
   final TextEditingController sController = TextEditingController();
   final TextEditingController tTController = TextEditingController();
   final TextEditingController lController = TextEditingController();
+
+  // 差速轮驱动轮轮距
+  final robotWidthController = TextEditingController(text: '600');
+  double get robotWidth => double.tryParse(robotWidthController.text) ?? 600;
 
   final List<Point> points = [];
   final List<Rect> rects = [];
@@ -321,6 +328,16 @@ class Global extends ChangeNotifier {
         return 1;
       }
     });
+    // 起点没有速度点则增加
+    if (!(sPoints[0].pointIndex == 0 && sPoints[0].t == 0)) {
+      sPoints.insert(0, SpeedPoint(pointIndex: 0));
+    }
+    //终点没有速度点则增加
+    int end = sPoints.length - 1;
+    if (!(sPoints[end].pointIndex == points.length - 2 &&
+        sPoints[end].t == 1)) {
+      sPoints.add(SpeedPoint(pointIndex: points.length - 2, t: 1));
+    }
   }
 
   int _selectedSIndex = -1;
@@ -406,6 +423,11 @@ class Global extends ChangeNotifier {
     await prefs.setString(key, value);
   }
 
+  createPath() {
+    reOrderSPoint();
+    notifyListeners();
+  }
+
   showError(String e) {
     if (context == null) return;
     showDialog(
@@ -437,6 +459,7 @@ class Global extends ChangeNotifier {
     sController.dispose();
     tTController.dispose();
     lController.dispose();
+    robotWidthController.dispose();
     image?.dispose();
     super.dispose();
   }

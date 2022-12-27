@@ -43,7 +43,7 @@ class SettingWidget extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               TextBox(
-                header: '实际宽长',
+                header: '实际宽长(mm)',
                 placeholder: '${global.resolution * 500} mm',
                 onSubmitted: (value) {
                   if (value.isEmpty) {
@@ -52,6 +52,13 @@ class SettingWidget extends StatelessWidget {
                   final width = double.parse(value);
                   global.resolution = width / 500;
                 },
+                inputFormatters: [XNumberTextInputFormatter()],
+              ),
+              const SizedBox(height: 20),
+              TextBox(
+                header: '轮距(mm)',
+                placeholder: '${global.robotWidth} mm',
+                controller: global.robotWidthController,
                 inputFormatters: [XNumberTextInputFormatter()],
               ),
             ],
