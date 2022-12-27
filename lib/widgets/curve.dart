@@ -202,6 +202,18 @@ class SCurveWidget extends StatelessWidget {
                       global.selectedIndex = index ~/ 2;
                     }
                   },
+                  onSecondaryTapDown: (details) {
+                    RenderBox box = context.findRenderObject() as RenderBox;
+                    final offset = box.globalToLocal(details.globalPosition);
+                    final index = global.sPoints.lastIndexWhere((p) =>
+                        (global.fromSPoint(p) + global.canvasOffset - offset)
+                            .distance <
+                        20);
+                    if (index != -1) {
+                      global.selectedSIndex = index;
+                      global.updateSController();
+                    }
+                  },
                   child: ClipRect(
                     child: CustomPaint(
                         size: global.canvasSize,
@@ -294,12 +306,6 @@ class _SRectPainter extends CustomPainter {
     ///绘制 Path
     canvas.drawPath(path, painter);
 
-    for (var i = 0; i < pointList.length; i++) {
-      var x = pointList[i].x;
-      var y = pointList[i].y;
-      canvas.drawCircle(Offset(x, y), 5, selectedIndex == i ? _red : _orange);
-    }
-
     if (nPoint != null) {
       var index = nPoint!.pointIndex;
       var t = nPoint!.t;
@@ -322,6 +328,12 @@ class _SRectPainter extends CustomPainter {
           ui.ParagraphConstraints(width: size.width - 100);
       ui.Paragraph paragraph = pb.build()..layout(pc);
       canvas.drawParagraph(paragraph, p.position);
+    }
+
+    for (var i = 0; i < pointList.length; i++) {
+      var x = pointList[i].x;
+      var y = pointList[i].y;
+      canvas.drawCircle(Offset(x, y), 5, selectedIndex == i ? _red : _orange);
     }
   }
 

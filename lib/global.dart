@@ -270,7 +270,7 @@ class Global extends ChangeNotifier {
 
   addSPoint() {
     if (selectedIndex == -1) {
-      showError('请先规划路径');
+      showError('请先选择路径点');
       return;
     }
     SpeedPoint sPoint = SpeedPoint(pointIndex: selectedIndex);
@@ -347,6 +347,10 @@ class Global extends ChangeNotifier {
     } else {
       return null;
     }
+  }
+
+  Offset fromSPoint(SpeedPoint p) {
+    return _getPoint(p.pointIndex, p.t).position;
   }
 
   ui.Tangent _getPoint(int i, double t) {
