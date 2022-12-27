@@ -20,5 +20,7 @@ class SpeedPoint {
   int pointIndex;
   double t; // 0~1
   double speed;
-  SpeedPoint({required this.pointIndex, this.t = 0, this.speed = 0});
+  int lead; // 超前滞后
+  SpeedPoint(
+      {required this.pointIndex, this.t = 0, this.speed = 0, this.lead = 0});
 }

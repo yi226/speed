@@ -207,7 +207,7 @@ class ControlWidget extends StatelessWidget {
 class SControlWidget extends StatelessWidget {
   const SControlWidget({super.key});
 
-  List<Widget> inputWidget(x, y, theta, s, func) {
+  List<Widget> inputWidget(x, y, theta, s, l, func, funcL) {
     return [
       Row(
         children: [
@@ -250,6 +250,19 @@ class SControlWidget extends StatelessWidget {
         inputFormatters: [XNumberTextInputFormatter()],
       ),
       const SizedBox(height: 20),
+      TextBox(
+        header: '超前滞后',
+        placeholder: '个数',
+        controller: l,
+        onSubmitted: (value) {
+          if (value.isNotEmpty) {
+            int v = int.parse(value);
+            funcL.call(v);
+          }
+        },
+        inputFormatters: [XNumberTextInputFormatter(isAllowDecimal: false)],
+      ),
+      const SizedBox(height: 20),
     ];
   }
 
@@ -284,8 +297,14 @@ class SControlWidget extends StatelessWidget {
                 ],
               ),
             ),
-            ...inputWidget(global.xSController, global.ySController,
-                global.tSController, global.sController, global.setSPoint),
+            ...inputWidget(
+                global.xSController,
+                global.ySController,
+                global.tSController,
+                global.sController,
+                global.lController,
+                global.setSPoint,
+                global.setSPointLead),
             TextBox(
               header: 't',
               placeholder: '0~1',
@@ -311,6 +330,10 @@ class SControlWidget extends StatelessWidget {
               children: [
                 FilledButton(
                   onPressed: () {
+                    double speed = double.parse(global.sController.text);
+                    int lead = int.parse(global.lController.text);
+                    global.setSPoint(speed);
+                    global.setSPointLead(lead);
                     global.selectedSIndex = -1;
                   },
                   child: const Text('确认'),

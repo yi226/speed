@@ -323,7 +323,7 @@ class _SRectPainter extends CustomPainter {
       ui.ParagraphBuilder pb = ui.ParagraphBuilder(
           ui.ParagraphStyle(fontWeight: FontWeight.normal, fontSize: 15))
         ..pushStyle(ui.TextStyle(color: Colors.orange))
-        ..addText(sPointList[i].speed.toString());
+        ..addText('s:${sPointList[i].speed}\nl:${sPointList[i].lead}');
       ui.ParagraphConstraints pc =
           ui.ParagraphConstraints(width: size.width - 100);
       ui.Paragraph paragraph = pb.build()..layout(pc);

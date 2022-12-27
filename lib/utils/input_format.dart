@@ -33,9 +33,8 @@ class XNumberTextInputFormatter extends TextInputFormatter {
       if (value.contains('.')) {
         int pointIndex = value.indexOf('.');
         String beforePoint = value.substring(0, pointIndex);
-//      print('$beforePoint');
+
         String afterPoint = value.substring(pointIndex + 1, value.length);
-//      print('$afterPoint');
         //小数点前面没内容补0
         if (beforePoint.isEmpty) {
           value = '0.$afterPoint';

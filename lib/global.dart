@@ -121,6 +121,8 @@ class Global extends ChangeNotifier {
     xSController.text = p.position.dx.toString();
     ySController.text = p.position.dy.toString();
     tSController.text = (p.angle / pi * 180).toString();
+    sController.text = sPoints[selectedSIndex].speed.toString();
+    lController.text = sPoints[selectedSIndex].lead.toString();
     notifyListeners();
   }
 
@@ -143,6 +145,7 @@ class Global extends ChangeNotifier {
   final TextEditingController tSController = TextEditingController();
   final TextEditingController sController = TextEditingController();
   final TextEditingController tTController = TextEditingController();
+  final TextEditingController lController = TextEditingController();
 
   final List<Point> points = [];
   final List<Rect> rects = [];
@@ -285,7 +288,18 @@ class Global extends ChangeNotifier {
   }
 
   setSPoint(double speed) {
+    if (selectedSIndex < 0) {
+      return;
+    }
     sPoints[selectedSIndex].speed = speed;
+    notifyListeners();
+  }
+
+  setSPointLead(int lead) {
+    if (selectedSIndex < 0) {
+      return;
+    }
+    sPoints[selectedSIndex].lead = lead;
     notifyListeners();
   }
 
@@ -410,6 +424,7 @@ class Global extends ChangeNotifier {
     tSController.dispose();
     sController.dispose();
     tTController.dispose();
+    lController.dispose();
     image?.dispose();
     super.dispose();
   }
