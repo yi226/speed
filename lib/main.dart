@@ -29,7 +29,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -116,8 +115,11 @@ class _MainPageState extends State<MainPage> {
                     );
                   }),
               CommandBarButton(
-                  label: const Text("测试(T)"),
-                  onPressed: () => global.showError('Test')),
+                  label: const Text("生成(C)"),
+                  onPressed: () => global.reOrderSPoint()),
+              CommandBarButton(
+                  label: const Text("报告(R)"),
+                  onPressed: () => global.showError('未完成')),
               const CommandBarSeparator(),
               CommandBarButton(
                   label: ComboBox(

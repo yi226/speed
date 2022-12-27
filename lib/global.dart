@@ -311,6 +311,18 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  reOrderSPoint() {
+    sPoints.sort((a, b) {
+      if (a.pointIndex < b.pointIndex) {
+        return -1;
+      } else if (a.pointIndex == b.pointIndex) {
+        return a.t.compareTo(b.t);
+      } else {
+        return 1;
+      }
+    });
+  }
+
   int _selectedSIndex = -1;
   int get selectedSIndex => _selectedSIndex;
   set selectedSIndex(int index) {
