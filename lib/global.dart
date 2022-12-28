@@ -5,8 +5,11 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speed/utils/load.dart';
+import 'package:speed/utils/path_planning.dart';
 import 'package:speed/utils/point.dart';
 import 'dart:ui' as ui;
+
+import 'package:speed/widgets/chart.dart';
 
 // 规划模式
 enum CType {
@@ -121,10 +124,10 @@ class Global extends ChangeNotifier {
     }
     var p = _getPoint(
         sPoints[selectedSIndex].pointIndex, sPoints[selectedSIndex].t);
-    xSController.text = p.position.dx.toString();
-    ySController.text = p.position.dy.toString();
+    xSController.text = (p.position.dx * resolution).toString();
+    ySController.text = (p.position.dy * resolution).toString();
     tSController.text = (p.angle / pi * 180).toString();
-    sController.text = sPoints[selectedSIndex].speed.toString();
+    sController.text = (sPoints[selectedSIndex].speed * resolution).toString();
     lController.text = sPoints[selectedSIndex].lead.toString();
     notifyListeners();
   }
@@ -328,6 +331,14 @@ class Global extends ChangeNotifier {
         return 1;
       }
     });
+  }
+
+  completeSPoint() {
+    if (sPoints.isEmpty) {
+      showError('至少需设置一个速度点');
+      return;
+    }
+    reOrderSPoint();
     // 起点没有速度点则增加
     if (!(sPoints[0].pointIndex == 0 && sPoints[0].t == 0)) {
       sPoints.insert(0, SpeedPoint(pointIndex: 0));
@@ -338,6 +349,7 @@ class Global extends ChangeNotifier {
         sPoints[end].t == 1)) {
       sPoints.add(SpeedPoint(pointIndex: points.length - 2, t: 1));
     }
+    notifyListeners();
   }
 
   int _selectedSIndex = -1;
@@ -423,18 +435,80 @@ class Global extends ChangeNotifier {
     await prefs.setString(key, value);
   }
 
-  createPath() {
+  createPath() async {
+    if (points.length < 2) {
+      showError('路径点过少');
+      return;
+    }
+    if (sPoints.length < 3) {
+      showError('速度点过少');
+      return;
+    }
     reOrderSPoint();
     notifyListeners();
+    var func = PathPlanFunc(
+        points: points,
+        sPoints: sPoints,
+        robotWidth: robotWidth,
+        resolution: resolution);
+    bool result = await func.outSpeedPlan();
+    if (result) {
+      showInfo('导出成功\n${func.fileName}');
+    } else {
+      showError('导出失败');
+    }
+  }
+
+  showSpeedCurve() {
+    if (context == null) return;
+    if (points.length < 2) {
+      showError('路径点过少');
+      return;
+    }
+    if (sPoints.length < 3) {
+      showError('速度点过少');
+      return;
+    }
+    reOrderSPoint();
+    notifyListeners();
+    var func = PathPlanFunc(
+        points: points,
+        sPoints: sPoints,
+        robotWidth: robotWidth,
+        resolution: resolution)
+      ..speedPlan();
+    var rPoints = func.rPoints;
+
+    showDialog(
+      context: context!,
+      builder: (context) => ContentDialog(
+        title: const Text('速度曲线'),
+        content: ChartWidget(points: rPoints, resolution: resolution),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   showError(String e) {
+    showBase('Error', e);
+  }
+
+  showInfo(String info) {
+    showBase('Info', info);
+  }
+
+  showBase(String title, String content) {
     if (context == null) return;
     showDialog(
       context: context!,
       builder: (context) => ContentDialog(
-        title: const Text('Error'),
-        content: Text(e),
+        title: Text(title),
+        content: Text(content),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(context),

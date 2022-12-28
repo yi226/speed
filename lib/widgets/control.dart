@@ -207,7 +207,7 @@ class ControlWidget extends StatelessWidget {
 class SControlWidget extends StatelessWidget {
   const SControlWidget({super.key});
 
-  List<Widget> inputWidget(x, y, theta, s, l, func, funcL) {
+  List<Widget> inputWidget(x, y, theta, s, l, func, funcL, resolution) {
     return [
       Row(
         children: [
@@ -238,12 +238,13 @@ class SControlWidget extends StatelessWidget {
       ),
       const SizedBox(height: 20),
       TextBox(
-        header: 'Speed',
+        header: 'Speed(mm/s)',
         placeholder: 'mm/s',
         controller: s,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
             double v = double.parse(value);
+            v = v / resolution;
             func.call(v);
           }
         },
@@ -305,7 +306,8 @@ class SControlWidget extends StatelessWidget {
                 global.sController,
                 global.lController,
                 global.setSPoint,
-                global.setSPointLead),
+                global.setSPointLead,
+                global.resolution),
             TextBox(
               header: 't',
               placeholder: '0~1',
@@ -332,6 +334,7 @@ class SControlWidget extends StatelessWidget {
                 FilledButton(
                   onPressed: () {
                     double speed = double.parse(global.sController.text);
+                    speed = speed / global.resolution;
                     int lead = int.parse(global.lController.text);
                     global.setSPoint(speed);
                     global.setSPointLead(lead);

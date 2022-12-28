@@ -223,7 +223,8 @@ class SCurveWidget extends StatelessWidget {
                             global.image!,
                             global.canvasOffset,
                             global.selectedIndex,
-                            global.selectedSIndex)),
+                            global.selectedSIndex,
+                            global.resolution)),
                   ),
                 );
               }),
@@ -256,11 +257,12 @@ class _SRectPainter extends CustomPainter {
   final int selectedSIndex;
   final Offset canvasOffset;
   final List<SpeedPoint> sPointList;
+  final double resolution;
   SpeedPoint? get nPoint =>
       selectedSIndex < 0 ? null : sPointList[selectedSIndex];
 
   _SRectPainter(this.pointList, this.sPointList, this.image, this.canvasOffset,
-      this.selectedIndex, this.selectedSIndex);
+      this.selectedIndex, this.selectedSIndex, this.resolution);
 
   ui.Tangent _getPoint(int i, double t) {
     var path = Path();
@@ -323,7 +325,8 @@ class _SRectPainter extends CustomPainter {
       ui.ParagraphBuilder pb = ui.ParagraphBuilder(
           ui.ParagraphStyle(fontWeight: FontWeight.normal, fontSize: 15))
         ..pushStyle(ui.TextStyle(color: Colors.orange))
-        ..addText('s:${sPointList[i].speed}\nl:${sPointList[i].lead}');
+        ..addText(
+            's:${sPointList[i].speed * resolution}\nl:${sPointList[i].lead}');
       ui.ParagraphConstraints pc =
           ui.ParagraphConstraints(width: size.width - 100);
       ui.Paragraph paragraph = pb.build()..layout(pc);

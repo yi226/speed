@@ -56,22 +56,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  void showContentDialog(BuildContext context) async {
-    await showDialog<String>(
-      context: context,
-      builder: (context) => ContentDialog(
-        title: const Text('Info'),
-        content: const Text('Info'),
-        actions: [
-          FilledButton(
-            child: const Text('确定'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final global = context.watch<Global>();
@@ -114,11 +98,14 @@ class _MainPageState extends State<MainPage> {
                     );
                   }),
               CommandBarButton(
+                  label: const Text("补全(C)"),
+                  onPressed: () => global.completeSPoint()),
+              CommandBarButton(
                   label: const Text("生成(C)"),
                   onPressed: () => global.createPath()),
               CommandBarButton(
                   label: const Text("报告(R)"),
-                  onPressed: () => global.showError('未完成')),
+                  onPressed: () => global.showSpeedCurve()),
               const CommandBarSeparator(),
               CommandBarButton(
                   label: ComboBox(
@@ -167,7 +154,7 @@ class _MainPageState extends State<MainPage> {
             icon: const Icon(FluentIcons.info),
             title: const Text('Info'),
             body: Container(),
-            onTap: () => showContentDialog(context),
+            onTap: () => global.showInfo('info'),
           ),
         ],
       ),
