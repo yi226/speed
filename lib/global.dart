@@ -437,6 +437,15 @@ class Global extends ChangeNotifier {
     await prefs.setString(key, value);
   }
 
+  bool checkSPoints() {
+    for (var i = 1; i < sPoints.length - 1; i++) {
+      if (sPoints[i].speed == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   createPath() async {
     if (points.length < 2) {
       showError('路径点过少');
@@ -448,6 +457,10 @@ class Global extends ChangeNotifier {
     }
     reOrderSPoint();
     notifyListeners();
+    if (!checkSPoints()) {
+      showError('中间速度点速度不能为0');
+      return;
+    }
     func = PathPlanFunc(
         points: points,
         sPoints: sPoints,
