@@ -380,6 +380,8 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  PathPlanFunc? func;
+
   //* Functions
   setImagePath() async {
     _imagePath = await _getFilePath();
@@ -446,38 +448,36 @@ class Global extends ChangeNotifier {
     }
     reOrderSPoint();
     notifyListeners();
-    var func = PathPlanFunc(
+    func = PathPlanFunc(
         points: points,
         sPoints: sPoints,
         robotWidth: robotWidth,
         resolution: resolution);
-    bool result = await func.outSpeedPlan();
-    if (result) {
-      showInfo('导出成功\n${func.fileName}');
-    } else {
-      showError('导出失败');
-    }
+    showDialog(
+      context: context!,
+      builder: (context) => const ContentDialog(
+        title: Text('导出中'),
+        content: ProgressBar(),
+      ),
+    );
+    await Future.delayed(const Duration(milliseconds: 500));
+    func!.outSpeedPlan().then((value) {
+      Navigator.pop(context!);
+      if (value) {
+        showInfo('导出成功\n${func!.fileName}');
+      } else {
+        showError('导出失败');
+      }
+    });
   }
 
   showSpeedCurve() {
     if (context == null) return;
-    if (points.length < 2) {
-      showError('路径点过少');
+    if (func == null) {
+      showError('请先生成代码');
       return;
     }
-    if (sPoints.length < 3) {
-      showError('速度点过少');
-      return;
-    }
-    reOrderSPoint();
-    notifyListeners();
-    var func = PathPlanFunc(
-        points: points,
-        sPoints: sPoints,
-        robotWidth: robotWidth,
-        resolution: resolution)
-      ..speedPlan();
-    var rPoints = func.rPoints;
+    var rPoints = func!.rPoints;
 
     showDialog(
       context: context!,

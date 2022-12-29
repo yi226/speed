@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:speed/utils/point.dart';
 
@@ -129,7 +130,6 @@ class PathPlanFunc {
         c: points.last.control.direction,
         v: sPoints.last.speed,
         leadlag: sPoints.last.lead,
-        a: points.last.a,
         t: T));
     // 去重
     for (var i = rPoints.length - 1; i > 0; i--) {
@@ -137,6 +137,59 @@ class PathPlanFunc {
         rPoints.removeAt(i);
       }
     }
+    // 位姿规划
+    // 找到路径规划点对应速度规划点
+    List pathPointIndexs = [];
+    for (var i = 0; i < points.length; i++) {
+      int index = rPoints.indexWhere((e) =>
+          (e.vec.dx - points[i].x).abs() < 1e-6 &&
+          (e.vec.dy - points[i].y).abs() < 1e-6);
+      for (var j = 1; index == -1; j += 10) {
+        index = rPoints.indexWhere((e) =>
+            (e.vec.dx - points[i].x).abs() < 1e-3 * j &&
+            (e.vec.dy - points[i].y).abs() < 1e-3 * j);
+      }
+      pathPointIndexs.add(index);
+    }
+    if (kDebugMode) {
+      print(pathPointIndexs);
+    }
+    for (var i = 0; i < points.length - 1; i++) {
+      double sita1 = points[i].a;
+      double sita2 = points[i + 1].a;
+      double w1 = points[i].w;
+      double w2 = points[i + 1].w;
+      int i1 = pathPointIndexs[i];
+      int i2 = pathPointIndexs[i + 1];
+      double T = rPoints[i2].t - rPoints[i1].t;
+      for (var j = i1; j <= i2; j++) {
+        double t = rPoints[j].t - rPoints[i1].t;
+        rPoints[j].a = poseCaculate(sita1, sita2, w1, w2, T, t, true);
+        rPoints[j].w = poseCaculate(sita1, sita2, w1, w2, T, t, false);
+      }
+    }
+  }
+
+  double poseCaculate(double sita1, double sita2, double w1, double w2,
+      double T, double t, bool selectSW) {
+    double A, B, C, E, F;
+    double sita;
+    double w;
+
+    A = (sita2 - sita1 - (w1 + w2) * T / 2.0) /
+        (T / 2.0 - sin(T) + 1 / 12.0 * T * T * sin(T) + 1 / 2.0 * T * cos(T));
+    C = (w2 - w1 - A * (1 - cos(T)) + 1 / 3.0 * A * T * sin(T)) * 6 / (T * T);
+    B = (-A * sin(T) - C * T) / (T * T);
+    E = w1 + A;
+    F = sita1;
+    sita = -A * sin(t) +
+        1 / 12.0 * B * pow(t, 4) +
+        1 / 6.0 * C * pow(t, 3) +
+        E * t +
+        F;
+    w = -A * cos(t) + 1 / 3.0 * B * pow(t, 3) + 1 / 2.0 * C * pow(t, 2) + E;
+
+    return selectSW ? sita : w;
   }
 
   Future<bool> outSpeedPlan() {
