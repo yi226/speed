@@ -229,16 +229,16 @@ class PathPlanFunc {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocDirPath = appDocDir.path;
     if (Platform.isWindows) {
-      appDocDirPath = './';
+      appDocDirPath = '.';
     }
-    fileName = '$appDocDirPath/Path$i.h';
+    fileName = '$appDocDirPath/path/Path$i.h';
     File file = File(fileName);
     while (file.existsSync()) {
       i++;
-      fileName = '$appDocDirPath/Path$i.h';
+      fileName = '$appDocDirPath/path/Path$i.h';
       file = File(fileName);
     }
-    file.createSync();
+    await file.create(recursive: true);
     File file1 = await file.writeAsString(notes);
     if (file1.existsSync()) {
       fileName = file1.path;
