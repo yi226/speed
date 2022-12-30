@@ -11,63 +11,76 @@ class CurveWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final global = context.watch<Global>();
-    return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(width: 2, color: Colors.black),
-        ),
-        child: (global.imagePath == null || global.image == null)
-            ? SizedBox(
-                width: global.canvasSize.width,
-                height: global.canvasSize.height,
-                child: const FlutterLogo())
-            : Builder(builder: (context) {
-                return GestureDetector(
-                  onPanStart: (details) {
-                    RenderBox box = context.findRenderObject() as RenderBox;
-                    final offset = box.globalToLocal(details.globalPosition);
-                    final index = global.rects.lastIndexWhere((rect) =>
-                        (rect.center + global.canvasOffset - offset).distance <
-                        rect.shortestSide / 2);
-                    global.panIndex = index;
-                    if (index != -1) {
-                      global.selectedIndex = index ~/ 2;
-                    }
-                  },
-                  onPanUpdate: (details) {
-                    if (global.panIndex != -1) {
-                      global.updatePoints(global.panIndex, details.delta);
-                    } else {
-                      global.canvasOffset += details.delta;
-                    }
-                  },
-                  onPanEnd: (details) {
-                    global.panIndex = -1;
-                  },
-                  onTapDown: (details) {
-                    RenderBox box = context.findRenderObject() as RenderBox;
-                    final offset = box.globalToLocal(details.globalPosition);
-                    final index = global.rects.lastIndexWhere((rect) =>
-                        (rect.center + global.canvasOffset - offset).distance <
-                        rect.shortestSide / 2);
-                    if (index != -1) {
-                      global.selectedIndex = index ~/ 2;
-                    }
-                  },
-                  child: ClipRect(
-                    child: CustomPaint(
-                      size: global.canvasSize,
-                      painter: _RectPainter(
-                          global.rects,
-                          global.points,
-                          global.image!,
-                          global.canvasOffset,
-                          global.selectedIndex),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(width: 2, color: Colors.black),
+          ),
+          child: (global.imagePath == null || global.image == null)
+              ? SizedBox(
+                  width: global.canvasSize.width,
+                  height: global.canvasSize.height,
+                  child: const FlutterLogo())
+              : Builder(builder: (context) {
+                  return MouseRegion(
+                    onHover: (event) {
+                      global.cursorPosition = event.localPosition;
+                    },
+                    child: GestureDetector(
+                      onPanStart: (details) {
+                        RenderBox box = context.findRenderObject() as RenderBox;
+                        final offset =
+                            box.globalToLocal(details.globalPosition);
+                        final index = global.rects.lastIndexWhere((rect) =>
+                            (rect.center + global.canvasOffset - offset)
+                                .distance <
+                            rect.shortestSide / 2);
+                        global.panIndex = index;
+                        if (index != -1) {
+                          global.selectedIndex = index ~/ 2;
+                        }
+                      },
+                      onPanUpdate: (details) {
+                        if (global.panIndex != -1) {
+                          global.updatePoints(global.panIndex, details.delta);
+                        } else {
+                          global.canvasOffset += details.delta;
+                        }
+                      },
+                      onPanEnd: (details) {
+                        global.panIndex = -1;
+                      },
+                      onTapDown: (details) {
+                        RenderBox box = context.findRenderObject() as RenderBox;
+                        final offset =
+                            box.globalToLocal(details.globalPosition);
+                        final index = global.rects.lastIndexWhere((rect) =>
+                            (rect.center + global.canvasOffset - offset)
+                                .distance <
+                            rect.shortestSide / 2);
+                        if (index != -1) {
+                          global.selectedIndex = index ~/ 2;
+                        }
+                      },
+                      child: ClipRect(
+                        child: CustomPaint(
+                          size: global.canvasSize,
+                          painter: _RectPainter(
+                              global.rects,
+                              global.points,
+                              global.image!,
+                              global.canvasOffset,
+                              global.selectedIndex),
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              }),
-      ),
+                  );
+                }),
+        ),
+        Text(global.cursorPosition.toString()),
+      ],
     );
   }
 }
@@ -163,72 +176,88 @@ class SCurveWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final global = context.watch<Global>();
-    return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(width: 2, color: Colors.black),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(width: 2, color: Colors.black),
+          ),
+          child: (global.imagePath == null || global.image == null)
+              ? SizedBox(
+                  width: global.canvasSize.width,
+                  height: global.canvasSize.height,
+                  child: const FlutterLogo())
+              : Builder(builder: (context) {
+                  return MouseRegion(
+                    onHover: (event) {
+                      global.cursorPosition = event.localPosition;
+                    },
+                    child: GestureDetector(
+                      onPanStart: (details) {
+                        RenderBox box = context.findRenderObject() as RenderBox;
+                        final offset =
+                            box.globalToLocal(details.globalPosition);
+                        final index = global.rects.lastIndexWhere((rect) =>
+                            (rect.center + global.canvasOffset - offset)
+                                .distance <
+                            rect.shortestSide / 2);
+                        global.panIndex = index;
+                        if (index != -1) {
+                          global.selectedIndex = index ~/ 2;
+                        }
+                      },
+                      onPanUpdate: (details) {
+                        global.canvasOffset += details.delta;
+                      },
+                      onPanEnd: (details) {
+                        global.panIndex = -1;
+                      },
+                      onTapDown: (details) {
+                        RenderBox box = context.findRenderObject() as RenderBox;
+                        final offset =
+                            box.globalToLocal(details.globalPosition);
+                        final index = global.rects.lastIndexWhere((rect) =>
+                            (rect.center + global.canvasOffset - offset)
+                                .distance <
+                            rect.shortestSide / 2);
+                        if (index != -1) {
+                          global.selectedIndex = index ~/ 2;
+                        }
+                      },
+                      onSecondaryTapDown: (details) {
+                        RenderBox box = context.findRenderObject() as RenderBox;
+                        final offset =
+                            box.globalToLocal(details.globalPosition);
+                        final index = global.sPoints.lastIndexWhere((p) =>
+                            (global.fromSPoint(p) +
+                                    global.canvasOffset -
+                                    offset)
+                                .distance <
+                            20);
+                        if (index != -1) {
+                          global.selectedSIndex = index;
+                          global.updateSController();
+                        }
+                      },
+                      child: ClipRect(
+                        child: CustomPaint(
+                            size: global.canvasSize,
+                            painter: _SRectPainter(
+                                global.points,
+                                global.sPoints,
+                                global.image!,
+                                global.canvasOffset,
+                                global.selectedIndex,
+                                global.selectedSIndex,
+                                global.resolution)),
+                      ),
+                    ),
+                  );
+                }),
         ),
-        child: (global.imagePath == null || global.image == null)
-            ? SizedBox(
-                width: global.canvasSize.width,
-                height: global.canvasSize.height,
-                child: const FlutterLogo())
-            : Builder(builder: (context) {
-                return GestureDetector(
-                  onPanStart: (details) {
-                    RenderBox box = context.findRenderObject() as RenderBox;
-                    final offset = box.globalToLocal(details.globalPosition);
-                    final index = global.rects.lastIndexWhere((rect) =>
-                        (rect.center + global.canvasOffset - offset).distance <
-                        rect.shortestSide / 2);
-                    global.panIndex = index;
-                    if (index != -1) {
-                      global.selectedIndex = index ~/ 2;
-                    }
-                  },
-                  onPanUpdate: (details) {
-                    global.canvasOffset += details.delta;
-                  },
-                  onPanEnd: (details) {
-                    global.panIndex = -1;
-                  },
-                  onTapDown: (details) {
-                    RenderBox box = context.findRenderObject() as RenderBox;
-                    final offset = box.globalToLocal(details.globalPosition);
-                    final index = global.rects.lastIndexWhere((rect) =>
-                        (rect.center + global.canvasOffset - offset).distance <
-                        rect.shortestSide / 2);
-                    if (index != -1) {
-                      global.selectedIndex = index ~/ 2;
-                    }
-                  },
-                  onSecondaryTapDown: (details) {
-                    RenderBox box = context.findRenderObject() as RenderBox;
-                    final offset = box.globalToLocal(details.globalPosition);
-                    final index = global.sPoints.lastIndexWhere((p) =>
-                        (global.fromSPoint(p) + global.canvasOffset - offset)
-                            .distance <
-                        20);
-                    if (index != -1) {
-                      global.selectedSIndex = index;
-                      global.updateSController();
-                    }
-                  },
-                  child: ClipRect(
-                    child: CustomPaint(
-                        size: global.canvasSize,
-                        painter: _SRectPainter(
-                            global.points,
-                            global.sPoints,
-                            global.image!,
-                            global.canvasOffset,
-                            global.selectedIndex,
-                            global.selectedSIndex,
-                            global.resolution)),
-                  ),
-                );
-              }),
-      ),
+        Text(global.cursorPosition.toString()),
+      ],
     );
   }
 }

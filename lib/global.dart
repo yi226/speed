@@ -383,6 +383,13 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  Offset _cursorPosition = Offset.zero;
+  Offset get cursorPosition => _cursorPosition;
+  set cursorPosition(Offset offset) {
+    _cursorPosition = posTransFrom(p: offset - canvasOffset);
+    notifyListeners();
+  }
+
   PathPlanFunc? func;
 
   //* Functions

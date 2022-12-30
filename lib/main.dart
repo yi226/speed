@@ -135,7 +135,7 @@ class _MainPageState extends State<MainPage> {
         menuButton: Container(),
         items: [
           PaneItem(
-              icon: const Icon(FluentIcons.file_image),
+              icon: const Icon(FluentIcons.app_icon_default_edit),
               title: const Text('Speed Plan'),
               body: Row(
                 children: global.cType == CType.path
