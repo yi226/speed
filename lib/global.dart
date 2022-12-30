@@ -402,6 +402,7 @@ class Global extends ChangeNotifier {
       image?.dispose();
       image = null;
       selectedIndex = -1;
+      cType = CType.path;
     }
     notifyListeners();
   }

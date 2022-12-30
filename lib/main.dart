@@ -118,7 +118,13 @@ class _MainPageState extends State<MainPage> {
                             ))
                         .toList(),
                     onChanged: (value) {
-                      if (value != null) global.cType = CType.parse(value);
+                      if (global.image == null) {
+                        global.showError('请先选择地图');
+                        return;
+                      }
+                      if (value != null) {
+                        global.cType = CType.parse(value);
+                      }
                     },
                   ),
                   onPressed: () {}),
