@@ -4,6 +4,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/widgets/control.dart';
 import 'package:speed/widgets/curve.dart';
+import 'package:speed/widgets/info.dart';
 import 'package:speed/widgets/setting.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -154,7 +155,10 @@ class _MainPageState extends State<MainPage> {
             icon: const Icon(FluentIcons.info),
             title: const Text('Info'),
             body: Container(),
-            onTap: () => global.showInfo('info'),
+            onTap: () {
+              Info info = Info();
+              info.showInfo(context);
+            },
           ),
         ],
       ),
