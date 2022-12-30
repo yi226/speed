@@ -72,8 +72,7 @@ class ControlWidget extends StatelessWidget {
         children: [
           Expanded(
             child: TextBox(
-              header: 'Lambda(mm)',
-              placeholder: 'mm',
+              header: 'Lambda',
               enabled: enabled,
               controller: d,
               onSubmitted: (value) => onUpdate(2, value),

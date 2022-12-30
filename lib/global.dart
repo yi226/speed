@@ -124,8 +124,8 @@ class Global extends ChangeNotifier {
     }
     var p = _getPoint(
         sPoints[selectedSIndex].pointIndex, sPoints[selectedSIndex].t);
-    xSController.text = (p.position.dx * resolution).toString();
-    ySController.text = (p.position.dy * resolution).toString();
+    xSController.text = posTransFrom(x: p.position.dx).dx.toString();
+    ySController.text = posTransFrom(y: p.position.dy).dy.toString();
     tSController.text = (p.angle / pi * 180).toString();
     sController.text = (sPoints[selectedSIndex].speed * resolution).toString();
     lController.text = sPoints[selectedSIndex].lead.toString();
@@ -211,7 +211,7 @@ class Global extends ChangeNotifier {
   setPoints(int type, double value) {
     switch (type) {
       case 0:
-        points[selectedIndex].x = value / resolution;
+        points[selectedIndex].x = posTransTo(x: value).dx;
         final point = points[selectedIndex];
         rects[2 * selectedIndex] =
             Rect.fromCircle(center: Offset(point.x, point.y), radius: 10);
@@ -221,7 +221,7 @@ class Global extends ChangeNotifier {
             radius: 6);
         break;
       case 1:
-        points[selectedIndex].y = value / resolution;
+        points[selectedIndex].y = posTransTo(y: value).dy;
         final point = points[selectedIndex];
         rects[2 * selectedIndex] =
             Rect.fromCircle(center: Offset(point.x, point.y), radius: 10);
@@ -232,7 +232,7 @@ class Global extends ChangeNotifier {
         break;
       case 2:
         points[selectedIndex].control = Offset.fromDirection(
-            points[selectedIndex].control.direction, value / resolution);
+            points[selectedIndex].control.direction, value);
         final point = points[selectedIndex];
         rects[2 * selectedIndex + 1] = Rect.fromCircle(
             center:
@@ -241,7 +241,7 @@ class Global extends ChangeNotifier {
         break;
       case 3:
         points[selectedIndex].control = Offset.fromDirection(
-            value / 180 * pi, points[selectedIndex].control.distance);
+            -value / 180 * pi, points[selectedIndex].control.distance);
         final point = points[selectedIndex];
         rects[2 * selectedIndex + 1] = Rect.fromCircle(
             center:
@@ -268,12 +268,11 @@ class Global extends ChangeNotifier {
       wController.text = '';
       aController.text = '';
     } else {
-      xController.text = (points[index].x * resolution).toString();
-      yController.text = (points[index].y * resolution).toString();
-      dController.text =
-          (points[index].control.distance * resolution).toString();
+      xController.text = posTransFrom(x: points[index].x).dx.toString();
+      yController.text = posTransFrom(y: points[index].y).dy.toString();
+      dController.text = (points[index].control.distance).toString();
       tController.text =
-          (points[index].control.direction / pi * 180).toString();
+          (-points[index].control.direction / pi * 180).toString();
       wController.text = points[index].w.toString();
       aController.text = points[index].a.toString();
     }
@@ -334,6 +333,10 @@ class Global extends ChangeNotifier {
   }
 
   completeSPoint() {
+    if (cType != CType.speed) {
+      showError('请切换为速度模式');
+      return;
+    }
     if (sPoints.isEmpty) {
       showError('至少需设置一个速度点');
       return;
@@ -406,6 +409,40 @@ class Global extends ChangeNotifier {
     }
   }
 
+  Offset posTransFrom({double? x, double? y, Offset? p}) {
+    Offset r = Offset.zero;
+    Offset o = Offset(canvasSize.width * 0.5, canvasSize.height);
+    if (x != null) {
+      r = r.translate(x - o.dx, 0);
+    }
+    if (y != null) {
+      r = r.translate(0, o.dy - y);
+    }
+    if (p != null) {
+      r = r.translate(p.dx - o.dx, o.dy - p.dy);
+    }
+    r = r * resolution;
+    return r;
+  }
+
+  Offset posTransTo({double? x, double? y, Offset? p}) {
+    Offset r = Offset.zero;
+    Offset o = Offset(canvasSize.width * 0.5, canvasSize.height);
+    if (x != null) {
+      x /= resolution;
+      r = r.translate(x + o.dx, 0);
+    }
+    if (y != null) {
+      y /= resolution;
+      r = r.translate(0, o.dy - y);
+    }
+    if (p != null) {
+      p /= resolution;
+      r = r.translate(p.dx + o.dx, o.dy - p.dy);
+    }
+    return r;
+  }
+
   Offset fromSPoint(SpeedPoint p) {
     return _getPoint(p.pointIndex, p.t).position;
   }
@@ -447,6 +484,10 @@ class Global extends ChangeNotifier {
   }
 
   createPath() async {
+    if (cType != CType.speed) {
+      showError('请切换为速度模式');
+      return;
+    }
     if (points.length < 2) {
       showError('路径点过少');
       return;
@@ -465,6 +506,7 @@ class Global extends ChangeNotifier {
         points: points,
         sPoints: sPoints,
         robotWidth: robotWidth,
+        canvasSize: canvasSize,
         resolution: resolution);
     showDialog(
       context: context!,
@@ -486,6 +528,10 @@ class Global extends ChangeNotifier {
 
   showSpeedCurve() {
     if (context == null) return;
+    if (cType != CType.speed) {
+      showError('请切换为速度模式');
+      return;
+    }
     if (func == null) {
       showError('请先生成代码');
       return;
@@ -497,6 +543,7 @@ class Global extends ChangeNotifier {
       builder: (context) => ContentDialog(
         title: const Text('速度曲线'),
         content: ChartWidget(points: rPoints, resolution: resolution),
+        constraints: const BoxConstraints(maxWidth: 600),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(context),

@@ -12,10 +12,15 @@ class Info {
 
   Future<Response<dynamic>> downloadInfo() async {
     Response response;
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocDirPath = appDocDir.path;
+    if (Platform.isWindows) {
+      appDocDirPath = '.';
+    }
     try {
       response = await dio.download(
         'https://github.com/yi226/speed/releases/download/info/info.json',
-        './doc/info.json',
+        '$appDocDirPath/doc/info.json',
       );
     } catch (e) {
       response = Response(

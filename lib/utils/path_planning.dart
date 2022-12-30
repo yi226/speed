@@ -34,6 +34,7 @@ class CAPPoint {
 
 class PathPlanFunc {
   double robotWidth;
+  Size canvasSize;
   List<Point> points;
   List<SpeedPoint> sPoints;
   String fileName = '';
@@ -44,6 +45,7 @@ class PathPlanFunc {
       {required this.points,
       required this.sPoints,
       required this.robotWidth,
+      required this.canvasSize,
       required this.resolution});
 
   ui.Tangent _getPointFromS(int i, double s) {
@@ -127,7 +129,7 @@ class PathPlanFunc {
     }
     rPoints.add(CAPPoint(
         vec: Offset(points.last.x, points.last.y),
-        c: points.last.control.direction,
+        c: -points.last.control.direction,
         v: sPoints.last.speed,
         leadlag: sPoints.last.lead,
         t: T));
@@ -192,14 +194,30 @@ class PathPlanFunc {
     return selectSW ? sita : w;
   }
 
+  Offset posTransFrom({double? x, double? y, Offset? p}) {
+    Offset r = Offset.zero;
+    Offset o = Offset(canvasSize.width * 0.5, canvasSize.height);
+    if (x != null) {
+      r = r.translate(x - o.dx, 0);
+    }
+    if (y != null) {
+      r = r.translate(0, o.dy - y);
+    }
+    if (p != null) {
+      r = r.translate(p.dx - o.dx, o.dy - p.dy);
+    }
+    r = r * resolution;
+    return r;
+  }
+
   Future<bool> outSpeedPlan() {
     speedPlan();
     String notes =
         '/* ref_x,    ref_y,    ref_theta,   ref_pose,    ref_delta,    ref_v,    ref_preivew*/\n';
     notes += 'const NavigationPoints path_red0[PATHLENGTH0] = {\n';
     for (var i = 0; i < rPoints.length; i++) {
-      var x = (rPoints[i].vec.dx * resolution).toStringAsFixed(6);
-      var y = (rPoints[i].vec.dy * resolution).toStringAsFixed(6);
+      var x = posTransFrom(x: rPoints[i].vec.dx).dx.toStringAsFixed(6);
+      var y = posTransFrom(y: rPoints[i].vec.dy).dy.toStringAsFixed(6);
       var theta = rPoints[i].c.toStringAsFixed(6);
       var pose = rPoints[i].a.toStringAsFixed(6);
       var delta = atan(robotWidth).abs().toStringAsFixed(6);
@@ -210,8 +228,8 @@ class PathPlanFunc {
     notes += '};\n';
     notes += 'const NavigationPoints path_blue0[PATHLENGTH0] = {\n';
     for (var i = 0; i < rPoints.length; i++) {
-      var x = (-rPoints[i].vec.dx * resolution).toStringAsFixed(6);
-      var y = (rPoints[i].vec.dy * resolution).toStringAsFixed(6);
+      var x = (-posTransFrom(x: rPoints[i].vec.dx).dx).toStringAsFixed(6);
+      var y = posTransFrom(y: rPoints[i].vec.dy).dy.toStringAsFixed(6);
       var theta = (pi - rPoints[i].c).toStringAsFixed(6);
       var pose = (pi - rPoints[i].a).toStringAsFixed(6);
       var delta = (-atan(robotWidth).abs()).toStringAsFixed(6);

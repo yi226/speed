@@ -99,7 +99,7 @@ class _MainPageState extends State<MainPage> {
                     );
                   }),
               CommandBarButton(
-                  label: const Text("补全(C)"),
+                  label: const Text("补全(A)"),
                   onPressed: () => global.completeSPoint()),
               CommandBarButton(
                   label: const Text("生成(C)"),
