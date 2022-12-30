@@ -81,7 +81,7 @@ class ControlWidget extends StatelessWidget {
           ),
           Expanded(
             child: TextBox(
-              header: 'Theta',
+              header: 'Theta(o)',
               placeholder: 'o',
               enabled: enabled,
               controller: t,
@@ -92,13 +92,13 @@ class ControlWidget extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 20),
-      const Text('其他数值'),
+      const Text('位姿控制'),
       const SizedBox(height: 20),
       Row(
         children: [
           Expanded(
             child: TextBox(
-              header: 'w',
+              header: 'w(rad/s)',
               placeholder: '角速度',
               enabled: enabled,
               controller: w,
@@ -108,8 +108,8 @@ class ControlWidget extends StatelessWidget {
           ),
           Expanded(
             child: TextBox(
-              header: 'a',
-              placeholder: '加速度',
+              header: 'a(rad)',
+              placeholder: '位姿',
               enabled: enabled,
               controller: a,
               onSubmitted: (value) => onUpdate(5, value),
@@ -230,7 +230,7 @@ class SControlWidget extends StatelessWidget {
       ),
       const SizedBox(height: 20),
       TextBox(
-        header: 'Theta',
+        header: 'Theta(o)',
         placeholder: 'o',
         controller: theta,
         readOnly: true,
