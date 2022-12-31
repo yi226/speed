@@ -69,6 +69,12 @@ class _MainPageState extends State<MainPage> {
           child: CommandBar(
             primaryItems: [
               CommandBarButton(
+                  label: const Text("导出(O)"),
+                  onPressed: () => global.exportPath()),
+              CommandBarButton(
+                  label: const Text("导入(I)"),
+                  onPressed: () => global.importPath()),
+              CommandBarButton(
                   label: const Text("地图(M)"),
                   onPressed: () => global.setImagePath()),
               CommandBarButton(

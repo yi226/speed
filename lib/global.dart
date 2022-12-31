@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speed/utils/load.dart';
+import 'package:speed/utils/path_file.dart';
 import 'package:speed/utils/path_planning.dart';
 import 'package:speed/utils/point.dart';
 import 'dart:ui' as ui;
@@ -169,11 +170,16 @@ class Global extends ChangeNotifier {
   final TextEditingController lController = TextEditingController();
 
   // 差速轮驱动轮轮距
-  final robotWidthController = TextEditingController(text: '600');
-  double get robotWidth => double.tryParse(robotWidthController.text) ?? 600;
+  final robotWidthController = TextEditingController(text: '60');
+  double get robotWidth => double.tryParse(robotWidthController.text) ?? 60;
 
   final List<Point> points = [];
   final List<Rect> rects = [];
+  clearPoints() {
+    points.clear();
+    rects.clear();
+  }
+
   addPoints(Point point, {int? index}) {
     if (index == null) {
       points.add(point);
@@ -293,7 +299,7 @@ class Global extends ChangeNotifier {
     }
   }
 
-  final List<SpeedPoint> sPoints = [];
+  List<SpeedPoint> sPoints = [];
 
   addSPoint() {
     if (selectedIndex == -1) {
@@ -548,6 +554,48 @@ class Global extends ChangeNotifier {
         showError('导出失败');
       }
     });
+  }
+
+  exportPath() async {
+    String? outputFile = await FilePicker.platform.saveFile(
+      dialogTitle: 'Please select an output file:',
+      fileName: 'path.json',
+    );
+    if (outputFile != null) {
+      String? outPath = await PathFile.exportPath(
+          points: points,
+          sPoints: sPoints,
+          canvasSize: canvasSize,
+          resolution: resolution,
+          robotWidth: robotWidth,
+          path: outputFile);
+      showInfo(outPath ?? "导出失败，请重试");
+    }
+  }
+
+  importPath() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null && result.files.single.path != null) {
+      List tmp = await PathFile.importPath(result.files.single.path!);
+      if (tmp.length == 1) {
+        showError(tmp.first.toString());
+        return;
+      }
+      _canvasSize = tmp[0];
+      _resolution = tmp[1];
+      robotWidthController.text = tmp[2].toString();
+      List<Point> oPoints = tmp[3];
+      clearPoints();
+      for (var element in oPoints) {
+        addPoints(element);
+      }
+      sPoints = tmp[4] as List<SpeedPoint>;
+      _selectedIndex = -1;
+      _selectedSIndex = -1;
+      _canvasOffset = Offset.zero;
+      cType = CType.path;
+      notifyListeners();
+    }
   }
 
   showSpeedCurve() {

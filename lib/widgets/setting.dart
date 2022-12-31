@@ -56,8 +56,8 @@ class SettingWidget extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               TextBox(
-                header: '轮距(mm)',
-                placeholder: '${global.robotWidth} mm',
+                header: '轮距',
+                placeholder: '${global.robotWidth}',
                 controller: global.robotWidthController,
                 inputFormatters: [XNumberTextInputFormatter()],
               ),
