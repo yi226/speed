@@ -162,7 +162,7 @@ class _MainPageState extends State<MainPage> {
             title: const Text('Info'),
             body: Container(),
             onTap: () {
-              Info info = Info();
+              Info info = Info(appDocDirPath: global.appDocDirPath);
               info.showInfo(context);
             },
           ),

@@ -3,24 +3,22 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:path_provider/path_provider.dart';
 
 class Info {
   String info = '加载中...';
   int? version;
   Dio dio = Dio(BaseOptions(connectTimeout: 2000));
+  String appDocDirPath;
+
+  Info({required this.appDocDirPath});
 
   Future<Response<dynamic>> downloadInfo() async {
     Response response;
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String appDocDirPath = appDocDir.path;
-    if (Platform.isWindows) {
-      appDocDirPath = '.';
-    }
+
     try {
       response = await dio.download(
         'https://github.com/yi226/speed/releases/download/info/info.json',
-        '$appDocDirPath/doc/info.json',
+        '$appDocDirPath${Platform.pathSeparator}doc${Platform.pathSeparator}info.json',
       );
     } catch (e) {
       response = Response(
@@ -30,28 +28,21 @@ class Info {
   }
 
   Future deleteInfo() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String appDocDirPath = appDocDir.path;
-    if (Platform.isWindows) {
-      appDocDirPath = '.';
-    }
-    File file = File('$appDocDirPath/doc/info.json');
+    File file = File(
+        '$appDocDirPath${Platform.pathSeparator}doc${Platform.pathSeparator}info.json');
     if (file.existsSync()) {
       await file.delete();
     }
   }
 
   Future<String> getInfo() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String appDocDirPath = appDocDir.path;
-    if (Platform.isWindows) {
-      appDocDirPath = '.';
-    }
-    File file = File('$appDocDirPath/doc/info.json');
+    File file = File(
+        '$appDocDirPath${Platform.pathSeparator}doc${Platform.pathSeparator}info.json');
     Response? response;
     if (!file.existsSync()) {
       response = await downloadInfo();
-      file = File('$appDocDirPath/doc/info.json');
+      file = File(
+          '$appDocDirPath${Platform.pathSeparator}doc${Platform.pathSeparator}info.json');
     }
 
     if (file.existsSync()) {

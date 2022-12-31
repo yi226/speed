@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speed/utils/load.dart';
 import 'package:speed/utils/path_planning.dart';
@@ -32,6 +34,16 @@ class Global extends ChangeNotifier {
     addPoints(Point(x: 100, y: 100));
     addPoints(Point(x: 200, y: 200));
     initMode();
+    initPath();
+  }
+
+  initPath() async {
+    if (Platform.isWindows || Platform.isLinux) {
+      _appDocDirPath = Directory.current.path;
+    } else {
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      _appDocDirPath = appDocDir.path;
+    }
   }
 
   initMode() async {
@@ -62,6 +74,9 @@ class Global extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  String? _appDocDirPath;
+  String get appDocDirPath => _appDocDirPath ?? '.';
 
   String get saveString =>
       '${mode == ThemeMode.dark}@$imagePath@${canvasSize.height}@$resolution@$robotWidth';
@@ -515,7 +530,8 @@ class Global extends ChangeNotifier {
         sPoints: sPoints,
         robotWidth: robotWidth,
         canvasSize: canvasSize,
-        resolution: resolution);
+        resolution: resolution,
+        appDocDirPath: appDocDirPath);
     showDialog(
       context: context!,
       builder: (context) => const ContentDialog(

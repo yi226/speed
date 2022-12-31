@@ -5,7 +5,6 @@ import 'dart:ui' as ui;
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:speed/utils/point.dart';
 
 class CAPPoint {
@@ -40,13 +39,15 @@ class PathPlanFunc {
   String fileName = '';
   double resolution;
   List<CAPPoint> rPoints = [];
+  String appDocDirPath;
 
   PathPlanFunc(
       {required this.points,
       required this.sPoints,
       required this.robotWidth,
       required this.canvasSize,
-      required this.resolution});
+      required this.resolution,
+      required this.appDocDirPath});
 
   ui.Tangent _getPointFromS(int i, double s) {
     int a = sPoints[i].pointIndex;
@@ -244,16 +245,13 @@ class PathPlanFunc {
   Future<bool> writeToFile(String notes) async {
     // export to .h file
     int i = 0;
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String appDocDirPath = appDocDir.path;
-    if (Platform.isWindows) {
-      appDocDirPath = '.';
-    }
-    fileName = '$appDocDirPath/path/Path$i.h';
+    fileName =
+        '$appDocDirPath${Platform.pathSeparator}path${Platform.pathSeparator}Path$i.h';
     File file = File(fileName);
     while (file.existsSync()) {
       i++;
-      fileName = '$appDocDirPath/path/Path$i.h';
+      fileName =
+          '$appDocDirPath${Platform.pathSeparator}path${Platform.pathSeparator}Path$i.h';
       file = File(fileName);
     }
     await file.create(recursive: true);
