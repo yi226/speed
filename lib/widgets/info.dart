@@ -46,12 +46,16 @@ class Info {
     }
 
     if (file.existsSync()) {
-      String jsonString = await file.readAsString();
-      var infoJson = json.decode(jsonString);
-      info = infoJson['info'];
-      version = infoJson['version'];
+      try {
+        String jsonString = await file.readAsString();
+        var infoJson = json.decode(jsonString);
+        info = infoJson['info'];
+        version = infoJson['version'];
+      } catch (e) {
+        info = '$e\n\n文档有误, 请更新文档\n\n开发者: 易鹏飞, 李思宇';
+      }
     } else {
-      info = '${response?.statusMessage}\n开发者: 易鹏飞，李思宇';
+      info = '${response?.statusMessage}\n\n开发者: 易鹏飞, 李思宇';
     }
 
     return info;
