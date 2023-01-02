@@ -5,9 +5,9 @@ import 'package:speed/utils/path_planning.dart';
 class ChartWidget extends StatelessWidget {
   final List<FlSpot> spots = [];
   ChartWidget(
-      {super.key, required List<CAPPoint> points, required resolution}) {
+      {super.key, required List<CAPPoint> points}) {
     for (var e in points) {
-      spots.add(FlSpot(e.t, e.v * resolution));
+      spots.add(FlSpot(e.t, e.v));
     }
   }
 

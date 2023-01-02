@@ -253,7 +253,7 @@ class Global extends ChangeNotifier {
         break;
       case 2:
         points[selectedIndex].control = Offset.fromDirection(
-            points[selectedIndex].control.direction, value);
+            points[selectedIndex].control.direction, value / resolution);
         final point = points[selectedIndex];
         rects[2 * selectedIndex + 1] = Rect.fromCircle(
             center:
@@ -291,7 +291,8 @@ class Global extends ChangeNotifier {
     } else {
       xController.text = posTransFrom(x: points[index].x).dx.toString();
       yController.text = posTransFrom(y: points[index].y).dy.toString();
-      dController.text = (points[index].control.distance).toString();
+      dController.text =
+          (points[index].control.distance * resolution).toString();
       tController.text =
           (-points[index].control.direction / pi * 180).toString();
       wController.text = points[index].w.toString();
@@ -614,7 +615,7 @@ class Global extends ChangeNotifier {
       context: context!,
       builder: (context) => ContentDialog(
         title: const Text('速度曲线'),
-        content: ChartWidget(points: rPoints, resolution: resolution),
+        content: ChartWidget(points: rPoints),
         constraints: const BoxConstraints(maxWidth: 600),
         actions: [
           FilledButton(

@@ -72,7 +72,8 @@ class ControlWidget extends StatelessWidget {
         children: [
           Expanded(
             child: TextBox(
-              header: 'Lambda',
+              header: 'Lambda(mm)',
+              placeholder: 'mm',
               enabled: enabled,
               controller: d,
               onSubmitted: (value) => onUpdate(2, value),
@@ -98,7 +99,7 @@ class ControlWidget extends StatelessWidget {
         children: [
           Expanded(
             child: TextBox(
-              header: 'w(rad/s)',
+              header: 'w(o/s)',
               placeholder: '角速度',
               enabled: enabled,
               controller: w,
@@ -108,7 +109,7 @@ class ControlWidget extends StatelessWidget {
           ),
           Expanded(
             child: TextBox(
-              header: 'a(rad)',
+              header: 'a(o)',
               placeholder: '位姿',
               enabled: enabled,
               controller: a,
