@@ -13,6 +13,7 @@ import 'package:speed/utils/point.dart';
 import 'dart:ui' as ui;
 
 import 'package:speed/widgets/chart.dart';
+import 'package:speed/widgets/info.dart';
 
 // 规划模式
 enum CType {
@@ -34,8 +35,8 @@ class Global extends ChangeNotifier {
   Global() {
     addPoints(Point(x: 100, y: 100));
     addPoints(Point(x: 200, y: 200));
-    initMode();
     initPath();
+    initMode();
   }
 
   initPath() async {
@@ -72,6 +73,13 @@ class Global extends ChangeNotifier {
           await save('Settings', saveString);
         }
       }
+    }
+    final firstString = await get('First');
+    if (firstString == null) {
+      await save('First', '1');
+      while (context == null) {}
+      Info info = Info(appDocDirPath: appDocDirPath);
+      info.showInfo(context!);
     }
     notifyListeners();
   }
