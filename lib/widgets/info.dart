@@ -52,10 +52,10 @@ class Info {
         info = infoJson['info'];
         version = infoJson['version'];
       } catch (e) {
-        info = '$e\n\n文档有误, 请更新文档\n\n开发者: 易鹏飞, 李思宇';
+        info = '$e\n\n文档有误, 请更新文档';
       }
     } else {
-      info = '${response?.statusMessage}\n\n开发者: 易鹏飞, 李思宇';
+      info = '${response?.statusMessage}';
     }
 
     return info;
@@ -74,6 +74,8 @@ class Info {
                 Expanded(
                     child: ListView(children: [Text(snapshot.data ?? info)])),
                 Text('Version: $version'),
+                const SizedBox(height: 10),
+                const Text('开发者: 易鹏飞, 李思宇'),
               ],
             );
           }),
