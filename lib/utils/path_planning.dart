@@ -29,6 +29,21 @@ class CAPPoint {
   bool equal(CAPPoint p) {
     return vec == p.vec;
   }
+
+  double parse(String name) {
+    switch (name) {
+      case '速度':
+        return v;
+      case '位姿':
+        return a;
+      case '角速度':
+        return w;
+      case '超前滞后':
+        return leadlag.toDouble();
+      default:
+        return v;
+    }
+  }
 }
 
 class PathPlanFunc {

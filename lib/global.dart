@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speed/utils/load.dart';
 import 'package:speed/utils/path_file.dart';
@@ -45,6 +46,9 @@ class Global extends ChangeNotifier {
     } else {
       Directory appDocDir = await getApplicationDocumentsDirectory();
       _appDocDirPath = appDocDir.path;
+    }
+    if (kDebugMode) {
+      print(appDocDirPath);
     }
   }
 
@@ -420,6 +424,13 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  ChartType _chartType = ChartType.v;
+  ChartType get chartType => _chartType;
+  set chartType(ChartType type) {
+    _chartType = type;
+    notifyListeners();
+  }
+
   PathPlanFunc? func;
 
   //* Functions
@@ -536,6 +547,15 @@ class Global extends ChangeNotifier {
     }
     reOrderSPoint();
     notifyListeners();
+    if (!(sPoints.first.pointIndex == 0 && sPoints.first.t == 0)) {
+      showError('起始点未设置速度, 请补全');
+      return;
+    }
+    if (!(sPoints.last.pointIndex == points.length - 2 &&
+        sPoints.last.t == 1)) {
+      showError('终止点未设置速度, 请补全');
+      return;
+    }
     if (!checkSPoints()) {
       showError('中间速度点速度不能为0');
       return;
@@ -554,7 +574,7 @@ class Global extends ChangeNotifier {
         content: ProgressBar(),
       ),
     );
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 200));
     func!.outSpeedPlan().then((value) {
       Navigator.pop(context!);
       if (value) {
@@ -620,19 +640,35 @@ class Global extends ChangeNotifier {
     var rPoints = func!.rPoints;
 
     showDialog(
-      context: context!,
-      builder: (context) => ContentDialog(
-        title: const Text('速度曲线'),
-        content: ChartWidget(points: rPoints),
-        constraints: const BoxConstraints(maxWidth: 600),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+        context: context!,
+        builder: (BuildContext context) {
+          final global = context.watch<Global>();
+          return ContentDialog(
+            title: Text('${global.chartType.name}曲线'),
+            content: ChartWidget(points: rPoints, type: chartType),
+            constraints: const BoxConstraints(maxWidth: 600),
+            actions: [
+              ComboBox(
+                value: global.chartType.name,
+                items: ChartType.values
+                    .map((e) => ComboBoxItem(
+                          value: e.name,
+                          child: Text(e.name),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    global.chartType = ChartType.parse(value);
+                  }
+                },
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        });
   }
 
   showError(String e) {
