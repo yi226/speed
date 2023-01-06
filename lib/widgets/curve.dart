@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/global.dart';
+import 'package:speed/utils/path_planning.dart';
 import 'dart:ui' as ui;
 
 import '../utils/point.dart';
@@ -372,5 +375,220 @@ class _SRectPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+class ECurveWidget extends StatefulWidget {
+  final List<Point> pointList;
+  final ui.Image image;
+  final List<CAPPoint> rPointList;
+  final Size canvasSize;
+  final Function posTransTo;
+  const ECurveWidget(
+      {super.key,
+      required this.pointList,
+      required this.image,
+      required this.rPointList,
+      required this.canvasSize,
+      required this.posTransTo});
+
+  @override
+  State<ECurveWidget> createState() => _ECurveWidgetState();
+}
+
+class _ECurveWidgetState extends State<ECurveWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    int sT = widget.rPointList.last.t.floor();
+    int mT = ((widget.rPointList.last.t - sT) * 1000).ceil();
+    _controller = AnimationController(
+        duration: Duration(seconds: sT, milliseconds: mT), vsync: this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  int getIndex(double value) {
+    int len = widget.rPointList.length - 1;
+    return (value * len).round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(width: 2, color: Colors.black),
+              ),
+              child: ClipRect(
+                  child: CustomPaint(
+                      size: widget.canvasSize,
+                      painter: _ERectPainter(
+                          widget.pointList,
+                          widget.image,
+                          widget.rPointList[getIndex(_controller.value)],
+                          widget.posTransTo))),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('时间:'),
+                Text(
+                    '${widget.rPointList[getIndex(_controller.value)].t.toStringAsFixed(2)}s'),
+                const SizedBox(height: 10),
+                VerticalProgressBar(
+                    width: 20, height: 400, value: _controller.value),
+                const SizedBox(height: 20),
+                child!,
+              ],
+            )
+          ],
+        );
+      },
+      child: Card(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+            icon: const Icon(FluentIcons.update_restore, size: 20),
+            onPressed: () {
+              _controller.reset();
+              _controller.forward();
+            }),
+      ),
+    );
+  }
+}
+
+class _ERectPainter extends CustomPainter {
+  final Paint _red = Paint()..color = Colors.red;
+  final painter = Paint()
+    ..color = Colors.blue
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = true
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = 2.0;
+  final dPainter = Paint()
+    ..color = Colors.red
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = true
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = 3.0;
+  final cPainter = Paint()
+    ..color = Colors.orange.withOpacity(0.5)
+    ..style = PaintingStyle.fill;
+
+  final List<Point> pointList;
+  final ui.Image image;
+  final CAPPoint rPoint;
+  Function posTransTo;
+
+  _ERectPainter(this.pointList, this.image, this.rPoint, this.posTransTo);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawImage(image, Offset.zero, Paint());
+
+    if (pointList.length < 2) {
+      return;
+    }
+
+    // 创建路径
+    var path = Path();
+
+    path.moveTo(pointList[0].x, pointList[0].y);
+
+    for (var i = 0; i < pointList.length - 1; i++) {
+      var x1 = pointList[i].x + pointList[i].control.dx;
+      var y1 = pointList[i].y + pointList[i].control.dy;
+      var x2 = pointList[i + 1].x - pointList[i + 1].control.dx;
+      var y2 = pointList[i + 1].y - pointList[i + 1].control.dy;
+      var x3 = pointList[i + 1].x;
+      var y3 = pointList[i + 1].y;
+      path.cubicTo(x1, y1, x2, y2, x3, y3);
+    }
+
+    ///绘制 Path
+    canvas.drawPath(path, painter);
+
+    for (var i = 0; i < pointList.length; i++) {
+      var x = pointList[i].x;
+      var y = pointList[i].y;
+      canvas.drawCircle(Offset(x, y), 5, _red);
+    }
+
+    // 创建三角形
+    var triPath = Path();
+    Offset center = posTransTo(p: rPoint.vec);
+    Offset a = center + Offset.fromDirection(-rPoint.c, 20);
+    Offset b = center + Offset.fromDirection(-rPoint.c + 120 / 180 * pi, 20);
+    Offset c = center + Offset.fromDirection(-rPoint.c - 120 / 180 * pi, 20);
+    triPath.moveTo(a.dx, a.dy);
+    triPath.lineTo(b.dx, b.dy);
+    triPath.lineTo(c.dx, c.dy);
+    canvas.drawPath(triPath, cPainter);
+    // 绘制方向
+    canvas.drawLine(center, a, dPainter);
+    // 绘制速度
+    ui.ParagraphBuilder pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(fontWeight: FontWeight.normal, fontSize: 15))
+      ..pushStyle(ui.TextStyle(color: Colors.red))
+      ..addText('v:${rPoint.v.round()}');
+    ui.ParagraphConstraints pc =
+        ui.ParagraphConstraints(width: size.width - 100);
+    ui.Paragraph paragraph = pb.build()..layout(pc);
+    canvas.drawParagraph(paragraph, center);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class VerticalProgressBar extends StatelessWidget {
+  final double width;
+  final double height;
+  final double value;
+  const VerticalProgressBar(
+      {super.key,
+      required this.width,
+      required this.height,
+      required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+          border: Border.all(width: 2, color: Colors.black),
+        ),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: SizedBox(
+            height: height * value,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

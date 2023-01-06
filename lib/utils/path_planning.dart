@@ -184,15 +184,19 @@ class PathPlanFunc {
         t: T));
     // 位姿规划
     // 找到路径规划点对应速度规划点
-    List pathPointIndexs = [];
-    for (var i = 0; i < _points.length - 1; i++) {
-      int index = rPoints.indexWhere((e) =>
-          (e.vec.dx - _points[i].x).abs() < 1e-6 &&
-          (e.vec.dy - _points[i].y).abs() < 1e-6);
+    List<int> pathPointIndexs = [0];
+    for (var i = 1; i < _points.length - 1; i++) {
+      int index = rPoints.indexWhere(
+          (e) =>
+              (e.vec.dx - _points[i].x).abs() < 1e-6 &&
+              (e.vec.dy - _points[i].y).abs() < 1e-6,
+          pathPointIndexs.last);
       for (var j = 1; index == -1; j += 10) {
-        index = rPoints.indexWhere((e) =>
-            (e.vec.dx - _points[i].x).abs() < 1e-5 * j &&
-            (e.vec.dy - _points[i].y).abs() < 1e-5 * j);
+        index = rPoints.indexWhere(
+            (e) =>
+                (e.vec.dx - _points[i].x).abs() < 1e-5 * j &&
+                (e.vec.dy - _points[i].y).abs() < 1e-5 * j,
+            pathPointIndexs.last);
       }
       pathPointIndexs.add(index);
     }

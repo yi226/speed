@@ -14,6 +14,7 @@ import 'package:speed/utils/point.dart';
 import 'dart:ui' as ui;
 
 import 'package:speed/widgets/chart.dart';
+import 'package:speed/widgets/curve.dart';
 import 'package:speed/widgets/info.dart';
 
 // 规划模式
@@ -581,6 +582,7 @@ class Global extends ChangeNotifier {
         showInfo('导出成功\n${func!.fileName}');
       } else {
         showError('导出失败');
+        func == null;
       }
     });
   }
@@ -662,6 +664,38 @@ class Global extends ChangeNotifier {
                   }
                 },
               ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        });
+  }
+
+  showEmulate() {
+    if (context == null) return;
+    if (cType != CType.speed) {
+      showError('请切换为速度模式');
+      return;
+    }
+    if (func == null) {
+      showError('请先生成代码');
+      return;
+    }
+
+    showDialog(
+        context: context!,
+        builder: (BuildContext context) {
+          return ContentDialog(
+            content: ECurveWidget(
+                pointList: points,
+                image: image!,
+                rPointList: func!.rPoints,
+                canvasSize: canvasSize,
+                posTransTo: posTransTo),
+            constraints: const BoxConstraints(maxWidth: 600),
+            actions: [
               FilledButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('OK'),

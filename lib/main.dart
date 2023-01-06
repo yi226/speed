@@ -113,6 +113,9 @@ class _MainPageState extends State<MainPage> {
               CommandBarButton(
                   label: const Text("报告(R)"),
                   onPressed: () => global.showSpeedCurve()),
+                  CommandBarButton(
+                  label: const Text("模拟(E)"),
+                  onPressed: () => global.showEmulate()),
               const CommandBarSeparator(),
               CommandBarButton(
                   label: ComboBox(
