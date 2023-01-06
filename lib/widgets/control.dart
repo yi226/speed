@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/global.dart';
+import 'package:speed/utils/extensions.dart';
 import 'package:speed/utils/input_format.dart';
 import 'package:speed/utils/point.dart';
 
@@ -77,7 +78,9 @@ class ControlWidget extends StatelessWidget {
               enabled: enabled,
               controller: d,
               onSubmitted: (value) => onUpdate(2, value),
-              inputFormatters: [XNumberTextInputFormatter()],
+              inputFormatters: [
+                XNumberTextInputFormatter(isAllowNegative: false)
+              ],
             ),
           ),
           Expanded(
@@ -194,7 +197,7 @@ class ControlWidget extends StatelessWidget {
               if (value.isEmpty) {
                 return;
               }
-              global.setPoints(type, double.parse(value));
+              global.setPoints(type, value.toDouble());
             }, global.xController, global.yController, global.dController,
                 global.tController, global.wController, global.aController),
           ],
@@ -243,12 +246,12 @@ class SControlWidget extends StatelessWidget {
         controller: s,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
-            double v = double.parse(value);
+            double v = value.toDouble();
             v = v / resolution;
             func.call(v);
           }
         },
-        inputFormatters: [XNumberTextInputFormatter()],
+        inputFormatters: [XNumberTextInputFormatter(isAllowNegative: false)],
       ),
       const SizedBox(height: 20),
       TextBox(
@@ -257,8 +260,8 @@ class SControlWidget extends StatelessWidget {
         controller: l,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
-            int v = int.parse(value);
-            funcL.call(v);
+            int lead = value.toInt();
+            funcL.call(lead);
           }
         },
         inputFormatters: [XNumberTextInputFormatter(isAllowDecimal: false)],
@@ -314,14 +317,16 @@ class SControlWidget extends StatelessWidget {
               controller: global.tTController,
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
-                  double v = double.parse(value);
+                  double v = value.toDouble();
                   if (v > 1) {
                     v = 1;
                   }
                   global.slideValue = v;
                 }
               },
-              inputFormatters: [XNumberTextInputFormatter()],
+              inputFormatters: [
+                XNumberTextInputFormatter(isAllowNegative: false)
+              ],
             ),
             Slider(
               value: global.slideValue,
@@ -333,9 +338,9 @@ class SControlWidget extends StatelessWidget {
               children: [
                 FilledButton(
                   onPressed: () {
-                    double speed = double.parse(global.sController.text);
+                    double speed = global.sController.text.toDouble();
                     speed = speed / global.resolution;
-                    int lead = int.parse(global.lController.text);
+                    int lead = global.lController.text.toInt();
                     global.setSPoint(speed);
                     global.setSPointLead(lead);
                     global.selectedSIndex = -1;

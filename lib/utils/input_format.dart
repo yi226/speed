@@ -1,20 +1,25 @@
 import 'package:flutter/services.dart';
+import 'package:speed/utils/extensions.dart';
 
 class XNumberTextInputFormatter extends TextInputFormatter {
   final int? _maxIntegerLength;
   final int? _maxDecimalLength;
   final bool _isAllowDecimal;
+  final bool _isAllowNegative;
 
   /// [maxIntegerLength]限定整数的最大位数，为null时不限
   /// [maxDecimalLength]限定小数点的最大位数，为null时不限
   /// [isAllowDecimal]是否可以为小数，默认是可以为小数，也就是可以输入小数点
-  XNumberTextInputFormatter(
-      {int? maxIntegerLength,
-      int? maxDecimalLength,
-      bool isAllowDecimal = true})
-      : _maxIntegerLength = maxIntegerLength,
+  /// [isAllowNegative]是否可以为负数
+  XNumberTextInputFormatter({
+    int? maxIntegerLength,
+    int? maxDecimalLength,
+    bool isAllowDecimal = true,
+    bool isAllowNegative = true,
+  })  : _maxIntegerLength = maxIntegerLength,
         _maxDecimalLength = maxDecimalLength,
-        _isAllowDecimal = isAllowDecimal;
+        _isAllowDecimal = isAllowDecimal,
+        _isAllowNegative = isAllowNegative;
 
   @override
   TextEditingValue formatEditUpdate(
@@ -85,8 +90,13 @@ class XNumberTextInputFormatter extends TextInputFormatter {
 
   ///输入内容不能解析成double
   bool _isToDoubleError(String value) {
+    if (!_isAllowNegative) {
+      if (value.contains('-')) {
+        return true;
+      }
+    }
     try {
-      double.parse(value);
+      value.toDouble();
     } catch (e) {
       return true;
     }

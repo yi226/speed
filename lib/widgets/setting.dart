@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/global.dart';
+import 'package:speed/utils/extensions.dart';
 import 'package:speed/utils/input_format.dart';
 
 class SettingWidget extends StatelessWidget {
@@ -37,7 +38,7 @@ class SettingWidget extends StatelessWidget {
                   if (value.isEmpty) {
                     return;
                   }
-                  global.canvasSize = Size(500, 500 * double.parse(value));
+                  global.canvasSize = Size(500, 500 * value.toDouble());
                 },
                 inputFormatters: [XNumberTextInputFormatter()],
               ),
@@ -49,7 +50,7 @@ class SettingWidget extends StatelessWidget {
                   if (value.isEmpty) {
                     return;
                   }
-                  final width = double.parse(value);
+                  final width = value.toDouble();
                   global.resolution = width / 500;
                 },
                 inputFormatters: [XNumberTextInputFormatter()],
