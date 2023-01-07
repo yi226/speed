@@ -60,22 +60,27 @@ class Global extends ChangeNotifier {
       if (kDebugMode) {
         print(setList);
       }
-      _mode = setList[0] == 'true' ? ThemeMode.dark : ThemeMode.light;
-      _imagePath = setList[1] == 'null' ? null : setList[1];
-      _canvasSize = Size(500, double.parse(setList[2]));
-      _resolution = double.parse(setList[3]);
-      robotWidthController.text = setList[4];
-      if (_imagePath != null) {
-        try {
-          image = await loadImage(_imagePath!,
-              height: _canvasSize.height.toInt(),
-              width: _canvasSize.width.toInt());
-        } catch (e) {
-          while (context == null) {}
-          showError(e.toString());
-          _imagePath = null;
-          image = null;
-          await save('Settings', saveString);
+      if (setList.length != 5) {
+        while (context == null) {}
+        showError('不兼容旧软件, 请重新保存设置');
+      } else {
+        _mode = setList[0] == 'true' ? ThemeMode.dark : ThemeMode.light;
+        imagePath = setList[1] == 'null' ? null : setList[1];
+        _canvasSize = Size(500, double.parse(setList[2]));
+        _resolution = double.parse(setList[3]);
+        robotWidthController.text = setList[4];
+        if (imagePath != null) {
+          try {
+            image = await loadImage(imagePath!,
+                height: _canvasSize.height.toInt(),
+                width: _canvasSize.width.toInt());
+          } catch (e) {
+            while (context == null) {}
+            showError(e.toString());
+            imagePath = null;
+            image = null;
+            await save('Settings', saveString);
+          }
         }
       }
     }
@@ -111,11 +116,8 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
-  String? _imagePath;
+  String? imagePath;
   ui.Image? image;
-  String? get imagePath {
-    return _imagePath;
-  }
 
   int _selectedIndex = -1;
   int get selectedIndex => _selectedIndex;
@@ -186,57 +188,35 @@ class Global extends ChangeNotifier {
   final robotWidthController = TextEditingController(text: '60');
   double get robotWidth => double.tryParse(robotWidthController.text) ?? 60;
 
-  final List<Point> points = [];
-  final List<Rect> rects = [];
-  clearPoints() {
-    points.clear();
-    rects.clear();
-  }
+  List<Point> points = [];
 
   addPoints(Point point, {int? index}) {
     if (index == null) {
       points.add(point);
-      rects.add(Rect.fromCircle(center: Offset(point.x, point.y), radius: 10));
-      rects.add(Rect.fromCircle(
-          center:
-              Offset(point.x + point.control.dx, point.y + point.control.dy),
-          radius: 6));
     } else {
       points.insert(index, point);
-      rects.insert(
-          2 * index,
-          Rect.fromCircle(
-              center: Offset(
-                  point.x + point.control.dx, point.y + point.control.dy),
-              radius: 6));
-      rects.insert(2 * index,
-          Rect.fromCircle(center: Offset(point.x, point.y), radius: 10));
       selectedIndex = index;
     }
     notifyListeners();
   }
 
-  deletePoints(int index) {
-    points.removeAt(index);
-    rects.removeAt(2 * index);
-    rects.removeAt(2 * index);
+  deletePoints() {
+    points.removeAt(selectedIndex);
     if (selectedIndex > points.length - 1) {
       selectedIndex = points.length - 1;
     }
     notifyListeners();
   }
 
-  updatePoints(int index, Offset offset) {
+  updatePoints(Offset offset) {
+    int index = panIndex;
     if (index % 2 == 0) {
       index = index ~/ 2;
       points[index].x = points[index].x + offset.dx;
       points[index].y = points[index].y + offset.dy;
-      rects[2 * index] = rects[2 * index].shift(offset);
-      rects[2 * index + 1] = rects[2 * index + 1].shift(offset);
     } else {
       index = index ~/ 2;
       points[index].control = points[index].control + offset;
-      rects[2 * index + 1] = rects[2 * index + 1].shift(offset);
     }
     updateController(index);
     notifyListeners();
@@ -246,41 +226,17 @@ class Global extends ChangeNotifier {
     switch (type) {
       case 0:
         points[selectedIndex].x = posTransTo(x: value).dx;
-        final point = points[selectedIndex];
-        rects[2 * selectedIndex] =
-            Rect.fromCircle(center: Offset(point.x, point.y), radius: 10);
-        rects[2 * selectedIndex + 1] = Rect.fromCircle(
-            center:
-                Offset(point.x + point.control.dx, point.y + point.control.dy),
-            radius: 6);
         break;
       case 1:
         points[selectedIndex].y = posTransTo(y: value).dy;
-        final point = points[selectedIndex];
-        rects[2 * selectedIndex] =
-            Rect.fromCircle(center: Offset(point.x, point.y), radius: 10);
-        rects[2 * selectedIndex + 1] = Rect.fromCircle(
-            center:
-                Offset(point.x + point.control.dx, point.y + point.control.dy),
-            radius: 6);
         break;
       case 2:
         points[selectedIndex].control = Offset.fromDirection(
             points[selectedIndex].control.direction, value / resolution);
-        final point = points[selectedIndex];
-        rects[2 * selectedIndex + 1] = Rect.fromCircle(
-            center:
-                Offset(point.x + point.control.dx, point.y + point.control.dy),
-            radius: 6);
         break;
       case 3:
         points[selectedIndex].control = Offset.fromDirection(
             -value / 180 * pi, points[selectedIndex].control.distance);
-        final point = points[selectedIndex];
-        rects[2 * selectedIndex + 1] = Rect.fromCircle(
-            center:
-                Offset(point.x + point.control.dx, point.y + point.control.dy),
-            radius: 6);
         break;
       case 4:
         points[selectedIndex].w = value;
@@ -289,7 +245,6 @@ class Global extends ChangeNotifier {
         points[selectedIndex].a = value;
         break;
     }
-
     notifyListeners();
   }
 
@@ -394,6 +349,7 @@ class Global extends ChangeNotifier {
   int get selectedSIndex => _selectedSIndex;
   set selectedSIndex(int index) {
     _selectedSIndex = index;
+    updateSController();
     notifyListeners();
   }
 
@@ -436,20 +392,22 @@ class Global extends ChangeNotifier {
 
   //* Functions
   setImagePath() async {
-    _imagePath = await _getFilePath();
-    if (_imagePath != null) {
-      image = await loadImage(_imagePath!,
+    imagePath = await _getImagePath();
+    if (imagePath != null) {
+      image = await loadImage(imagePath!,
           height: _canvasSize.height.toInt(), width: _canvasSize.width.toInt());
     } else {
       image?.dispose();
       image = null;
+      imagePath = null;
       selectedIndex = -1;
+      selectedSIndex = -1;
       cType = CType.path;
     }
     notifyListeners();
   }
 
-  Future<String?> _getFilePath() async {
+  Future<String?> _getImagePath() async {
     FilePickerResult? result =
         await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null) {
@@ -628,18 +586,14 @@ class Global extends ChangeNotifier {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null && result.files.single.path != null) {
       List tmp = await PathFile.importPath(result.files.single.path!);
-      if (tmp.length == 1) {
+      if (tmp.length != 5) {
         showError(tmp.first.toString());
         return;
       }
       _canvasSize = tmp[0];
       _resolution = tmp[1];
       robotWidthController.text = tmp[2].toString();
-      List<Point> oPoints = tmp[3];
-      clearPoints();
-      for (var element in oPoints) {
-        addPoints(element);
-      }
+      points = tmp[3] as List<Point>;
       sPoints = tmp[4] as List<SpeedPoint>;
       _selectedIndex = -1;
       _selectedSIndex = -1;

@@ -126,7 +126,7 @@ class ControlWidget extends StatelessWidget {
   }
 
   addPoint(Global global) {
-    if (global.imagePath == null) {
+    if (global.image == null) {
       return;
     }
     if (global.selectedIndex != -1) {
@@ -172,7 +172,7 @@ class ControlWidget extends StatelessWidget {
                       }
                       final result = await showAlert(context);
                       if (result == true) {
-                        global.deletePoints(global.selectedIndex);
+                        global.deletePoints();
                       }
                     },
                     child: const Text('删除'),

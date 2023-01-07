@@ -8,6 +8,24 @@ import 'dart:ui' as ui;
 
 import '../utils/point.dart';
 
+class IndexFunc {
+  static int getIndex(Global global, Offset offset) {
+    return global.points.indexWhere(
+        (e) => (Offset(e.x, e.y) + global.canvasOffset - offset).distance < 10);
+  }
+
+  static int getControlIndex(Global global, Offset offset) {
+    return global.points.indexWhere((e) =>
+        (Offset(e.x, e.y) + e.control + global.canvasOffset - offset).distance <
+        6);
+  }
+
+  static int getSpeedIndex(Global global, Offset offset) {
+    return global.sPoints.lastIndexWhere((p) =>
+        (global.fromSPoint(p) + global.canvasOffset - offset).distance < 20);
+  }
+}
+
 class CurveWidget extends StatelessWidget {
   const CurveWidget({super.key});
 
@@ -21,66 +39,69 @@ class CurveWidget extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(width: 2, color: Colors.black),
           ),
-          child: (global.imagePath == null || global.image == null)
+          child: (global.image == null)
               ? SizedBox(
                   width: global.canvasSize.width,
                   height: global.canvasSize.height,
                   child: const FlutterLogo())
-              : Builder(builder: (context) {
-                  return MouseRegion(
-                    onHover: (event) {
-                      global.cursorPosition = event.localPosition;
-                    },
-                    child: GestureDetector(
-                      onPanStart: (details) {
-                        RenderBox box = context.findRenderObject() as RenderBox;
-                        final offset =
-                            box.globalToLocal(details.globalPosition);
-                        final index = global.rects.lastIndexWhere((rect) =>
-                            (rect.center + global.canvasOffset - offset)
-                                .distance <
-                            rect.shortestSide / 2);
-                        global.panIndex = index;
-                        if (index != -1) {
-                          global.selectedIndex = index ~/ 2;
-                        }
+              : Builder(
+                  builder: (context) {
+                    return MouseRegion(
+                      onHover: (event) {
+                        global.cursorPosition = event.localPosition;
                       },
-                      onPanUpdate: (details) {
-                        if (global.panIndex != -1) {
-                          global.updatePoints(global.panIndex, details.delta);
-                        } else {
-                          global.canvasOffset += details.delta;
-                        }
-                      },
-                      onPanEnd: (details) {
-                        global.panIndex = -1;
-                      },
-                      onTapDown: (details) {
-                        RenderBox box = context.findRenderObject() as RenderBox;
-                        final offset =
-                            box.globalToLocal(details.globalPosition);
-                        final index = global.rects.lastIndexWhere((rect) =>
-                            (rect.center + global.canvasOffset - offset)
-                                .distance <
-                            rect.shortestSide / 2);
-                        if (index != -1) {
-                          global.selectedIndex = index ~/ 2;
-                        }
-                      },
-                      child: ClipRect(
-                        child: CustomPaint(
-                          size: global.canvasSize,
-                          painter: _RectPainter(
-                              global.rects,
+                      child: GestureDetector(
+                        onPanStart: (details) {
+                          var box = context.findRenderObject() as RenderBox;
+                          var offset =
+                              box.globalToLocal(details.globalPosition);
+                          int index = IndexFunc.getControlIndex(global, offset);
+                          if (index != -1) {
+                            global.panIndex = 2 * index + 1;
+                          } else {
+                            index = IndexFunc.getIndex(global, offset);
+                            if (index != -1) global.panIndex = 2 * index;
+                          }
+                          if (index != -1) {
+                            global.selectedIndex = index;
+                          } else {
+                            global.panIndex = -1;
+                          }
+                        },
+                        onPanUpdate: (details) {
+                          if (global.panIndex != -1) {
+                            global.updatePoints(details.delta);
+                          } else {
+                            global.canvasOffset += details.delta;
+                          }
+                        },
+                        onTapDown: (details) {
+                          var box = context.findRenderObject() as RenderBox;
+                          var offset =
+                              box.globalToLocal(details.globalPosition);
+                          int index = IndexFunc.getControlIndex(global, offset);
+                          if (index == -1) {
+                            index = IndexFunc.getIndex(global, offset);
+                          }
+                          if (index != -1) {
+                            global.selectedIndex = index;
+                          }
+                        },
+                        child: ClipRect(
+                          child: CustomPaint(
+                            size: global.canvasSize,
+                            painter: _RectPainter(
                               global.points,
                               global.image!,
                               global.canvasOffset,
-                              global.selectedIndex),
+                              global.selectedIndex,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  },
+                ),
         ),
         Text(global.cursorPosition.toString()),
       ],
@@ -107,22 +128,13 @@ class _RectPainter extends CustomPainter {
     ..strokeCap = StrokeCap.round
     ..strokeWidth = 2.0;
 
-  final List<Rect> rects;
   final List<Point> pointList;
   final ui.Image image;
   final int selectedIndex;
   final Offset canvasOffset;
 
-  _RectPainter(this.rects, this.pointList, this.image, this.canvasOffset,
-      this.selectedIndex);
-
-  Paint getColor(index) {
-    if (index % 2 == 0) {
-      return index ~/ 2 == selectedIndex ? _red : _orange;
-    } else {
-      return index ~/ 2 == selectedIndex ? _green : _teal;
-    }
-  }
+  _RectPainter(
+      this.pointList, this.image, this.canvasOffset, this.selectedIndex);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -130,16 +142,12 @@ class _RectPainter extends CustomPainter {
 
     canvas.drawImage(image, Offset.zero, Paint());
 
-    var i = 0;
-    for (Rect rect in rects) {
-      canvas.drawCircle(rect.center, rect.shortestSide / 2, getColor(i++));
-    }
-
     for (var i = 0; i < pointList.length; i++) {
-      var x1 = pointList[i].x + pointList[i].control.dx;
-      var y1 = pointList[i].y + pointList[i].control.dy;
-      canvas.drawLine(Offset(pointList[i].x, pointList[i].y), Offset(x1, y1),
-          controlPainter);
+      Offset center = Offset(pointList[i].x, pointList[i].y);
+      Offset control = center + pointList[i].control;
+      canvas.drawCircle(center, 10, i == selectedIndex ? _red : _orange);
+      canvas.drawCircle(control, 6, i == selectedIndex ? _green : _teal);
+      canvas.drawLine(center, control, controlPainter);
     }
 
     if (pointList.length < 2) {
@@ -160,8 +168,6 @@ class _RectPainter extends CustomPainter {
       var y3 = pointList[i + 1].y;
       path.cubicTo(x1, y1, x2, y2, x3, y3);
     }
-
-    // ui.PathMetric p = path.computeMetrics().elementAt(0);
 
     ///绘制 Path
     canvas.drawPath(path, painter);
@@ -186,7 +192,7 @@ class SCurveWidget extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(width: 2, color: Colors.black),
           ),
-          child: (global.imagePath == null || global.image == null)
+          child: (global.image == null)
               ? SizedBox(
                   width: global.canvasSize.width,
                   height: global.canvasSize.height,
@@ -197,50 +203,23 @@ class SCurveWidget extends StatelessWidget {
                       global.cursorPosition = event.localPosition;
                     },
                     child: GestureDetector(
-                      onPanStart: (details) {
-                        RenderBox box = context.findRenderObject() as RenderBox;
-                        final offset =
-                            box.globalToLocal(details.globalPosition);
-                        final index = global.rects.lastIndexWhere((rect) =>
-                            (rect.center + global.canvasOffset - offset)
-                                .distance <
-                            rect.shortestSide / 2);
-                        global.panIndex = index;
-                        if (index != -1) {
-                          global.selectedIndex = index ~/ 2;
-                        }
-                      },
                       onPanUpdate: (details) {
                         global.canvasOffset += details.delta;
                       },
-                      onPanEnd: (details) {
-                        global.panIndex = -1;
-                      },
                       onTapDown: (details) {
-                        RenderBox box = context.findRenderObject() as RenderBox;
-                        final offset =
-                            box.globalToLocal(details.globalPosition);
-                        final index = global.rects.lastIndexWhere((rect) =>
-                            (rect.center + global.canvasOffset - offset)
-                                .distance <
-                            rect.shortestSide / 2);
+                        var box = context.findRenderObject() as RenderBox;
+                        var offset = box.globalToLocal(details.globalPosition);
+                        int index = IndexFunc.getIndex(global, offset);
                         if (index != -1) {
-                          global.selectedIndex = index ~/ 2;
+                          global.selectedIndex = index;
                         }
                       },
                       onSecondaryTapDown: (details) {
-                        RenderBox box = context.findRenderObject() as RenderBox;
-                        final offset =
-                            box.globalToLocal(details.globalPosition);
-                        final index = global.sPoints.lastIndexWhere((p) =>
-                            (global.fromSPoint(p) +
-                                    global.canvasOffset -
-                                    offset)
-                                .distance <
-                            20);
+                        var box = context.findRenderObject() as RenderBox;
+                        var offset = box.globalToLocal(details.globalPosition);
+                        int index = IndexFunc.getSpeedIndex(global, offset);
                         if (index != -1) {
                           global.selectedSIndex = index;
-                          global.updateSController();
                         }
                       },
                       child: ClipRect(
@@ -472,7 +451,7 @@ class _ECurveWidgetState extends State<ECurveWidget>
 
 class _ERectPainter extends CustomPainter {
   final Paint _red = Paint()..color = Colors.red;
-  final Paint _orange= Paint()..color = Colors.orange;
+  final Paint _orange = Paint()..color = Colors.orange;
   final painter = Paint()
     ..color = Colors.blue
     ..style = PaintingStyle.stroke
