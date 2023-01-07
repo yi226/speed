@@ -472,6 +472,7 @@ class _ECurveWidgetState extends State<ECurveWidget>
 
 class _ERectPainter extends CustomPainter {
   final Paint _red = Paint()..color = Colors.red;
+  final Paint _orange= Paint()..color = Colors.orange;
   final painter = Paint()
     ..color = Colors.blue
     ..style = PaintingStyle.stroke
@@ -521,11 +522,8 @@ class _ERectPainter extends CustomPainter {
     ///绘制 Path
     canvas.drawPath(path, painter);
 
-    for (var i = 0; i < pointList.length; i++) {
-      var x = pointList[i].x;
-      var y = pointList[i].y;
-      canvas.drawCircle(Offset(x, y), 5, _red);
-    }
+    canvas.drawCircle(Offset(pointList.first.x, pointList.first.y), 5, _orange);
+    canvas.drawCircle(Offset(pointList.last.x, pointList.last.y), 5, _orange);
 
     // 创建三角形
     var triPath = Path();
@@ -538,6 +536,7 @@ class _ERectPainter extends CustomPainter {
     triPath.lineTo(c.dx, c.dy);
     canvas.drawPath(triPath, cPainter);
     // 绘制方向
+    canvas.drawCircle(center, 5, _red);
     canvas.drawLine(center, a, dPainter);
     // 绘制速度
     ui.ParagraphBuilder pb = ui.ParagraphBuilder(
