@@ -7,7 +7,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 class Info {
   String info = '加载中...';
   int? version;
-  Dio dio = Dio(BaseOptions(connectTimeout: 2000));
+  Dio dio = Dio();
   String appDocDirPath;
 
   Info({required this.appDocDirPath});
