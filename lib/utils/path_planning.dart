@@ -56,6 +56,9 @@ class PathPlanFunc {
   List<CAPPoint> rPoints = [];
   String appDocDirPath;
 
+  List<Point> get points => _points;
+  List<SpeedPoint> get sPoints => _sPoints;
+
   PathPlanFunc({
     required List<Point> points,
     required List<SpeedPoint> sPoints,
@@ -81,6 +84,21 @@ class PathPlanFunc {
         lead: e.lead,
       ));
     }
+  }
+
+  bool equalTo(PathPlanFunc func) {
+    if (_points.length != func.points.length) return false;
+    if (_sPoints.length != func.sPoints.length) return false;
+    if (robotWidth != func.robotWidth) return false;
+    if (canvasSize != func.canvasSize) return false;
+    if (resolution != func.resolution) return false;
+    for (var i = 0; i < _points.length; i++) {
+      if (!_points[i].equalTo(func.points[i])) return false;
+    }
+    for (var i = 0; i < _sPoints.length; i++) {
+      if (!_sPoints[i].equalTo(func.sPoints[i])) return false;
+    }
+    return true;
   }
 
   ui.Tangent _getPointFromS(int i, double s) {
@@ -133,7 +151,7 @@ class PathPlanFunc {
     return s;
   }
 
-  void speedPlan() {
+  Future<void> speedPlan() async {
     double dt = 0.01 / 20;
     double S, v1, v2, v, tFac;
     double t = 0, s = 0, T = 0;
@@ -260,7 +278,6 @@ class PathPlanFunc {
   }
 
   Future<bool> outSpeedPlan() {
-    speedPlan();
     String notes =
         '/* ref_x,    ref_y,    ref_theta,   ref_pose,    ref_delta,    ref_v,    ref_preivew*/\n';
     notes += 'const NavigationPoints path_red0[PATHLENGTH0] = {\n';

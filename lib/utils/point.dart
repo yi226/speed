@@ -14,6 +14,15 @@ class Point {
     this.w = 0,
     this.control = const Offset(0, 0),
   });
+
+  bool equalTo(Point point) {
+    if (x != point.x) return false;
+    if (y != point.y) return false;
+    if (a != point.a) return false;
+    if (w != point.w) return false;
+    if (control != point.control) return false;
+    return true;
+  }
 }
 
 class SpeedPoint {
@@ -23,4 +32,12 @@ class SpeedPoint {
   int lead; // 超前滞后
   SpeedPoint(
       {required this.pointIndex, this.t = 0, this.speed = 0, this.lead = 0});
+
+  bool equalTo(SpeedPoint point) {
+    if (pointIndex != point.pointIndex) return false;
+    if (t != point.t) return false;
+    if (speed != point.speed) return false;
+    if (lead != point.lead) return false;
+    return true;
+  }
 }

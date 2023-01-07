@@ -533,65 +533,85 @@ class Global extends ChangeNotifier {
     return true;
   }
 
-  createPath() async {
+  bool createPathWarning() {
     if (cType != CType.speed) {
       showError('请切换为速度模式');
-      return;
+      return true;
     }
     if (points.length < 2) {
       showError('路径点过少');
-      return;
+      return true;
     }
     if (sPoints.length < 3) {
       showError('速度点过少');
-      return;
+      return true;
     }
     reOrderSPoint();
     notifyListeners();
     if (!(sPoints.first.pointIndex == 0 && sPoints.first.t == 0)) {
       showError('起始点未设置速度, 请补全');
-      return;
+      return true;
     }
     if (!(sPoints.last.pointIndex == points.length - 2 &&
         sPoints.last.t == 1)) {
       showError('终止点未设置速度, 请补全');
-      return;
+      return true;
     }
     if (!checkSPoints()) {
       showError('中间速度点速度不能为0');
-      return;
+      return true;
     }
-    func = PathPlanFunc(
+    return false;
+  }
+
+  Future<bool> getFunc() async {
+    if (context == null) return false;
+    if (createPathWarning()) return false;
+    PathPlanFunc funcTmp = PathPlanFunc(
         points: points,
         sPoints: sPoints,
         robotWidth: robotWidth,
         canvasSize: canvasSize,
         resolution: resolution,
         appDocDirPath: appDocDirPath);
-    showDialog(
-      context: context!,
-      builder: (context) => const ContentDialog(
-        title: Text('导出中'),
-        content: ProgressBar(),
-      ),
-    );
-    await Future.delayed(const Duration(milliseconds: 200));
-    func!.outSpeedPlan().then((value) {
+    if (func == null || (func != null && !(func!.equalTo(funcTmp)))) {
+      func = funcTmp;
+      showDialog(
+        context: context!,
+        builder: (context) => const ContentDialog(
+          title: Text('生成中'),
+          content: ProgressBar(),
+        ),
+      );
+      await Future.delayed(const Duration(milliseconds: 200));
+      await func!.speedPlan();
       Navigator.pop(context!);
-      if (value) {
-        showInfo('导出成功\n${func!.fileName}');
-      } else {
-        showError('导出失败');
-        func == null;
-      }
-    });
+    }
+    return true;
+  }
+
+  createPath() async {
+    if (!(await getFunc())) return;
+    bool result = await func!.outSpeedPlan();
+    if (result) {
+      showInfo('导出成功\n${func!.fileName}');
+    } else {
+      showError('导出失败');
+      func == null;
+    }
   }
 
   exportPath() async {
-    String? outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: 'Please select an output file:',
-      fileName: 'path.json',
-    );
+    String? outputFile;
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Please select an output file:',
+        fileName: 'path.json',
+      );
+    } else {
+      outputFile = '$appDocDirPath${Platform.pathSeparator}path.json';
+    }
+
     if (outputFile != null) {
       String? outPath = await PathFile.exportPath(
           points: points,
@@ -629,16 +649,8 @@ class Global extends ChangeNotifier {
     }
   }
 
-  showSpeedCurve() {
-    if (context == null) return;
-    if (cType != CType.speed) {
-      showError('请切换为速度模式');
-      return;
-    }
-    if (func == null) {
-      showError('请先生成代码');
-      return;
-    }
+  showSpeedCurve() async {
+    if (!(await getFunc())) return;
     var rPoints = func!.rPoints;
 
     showDialog(
@@ -673,16 +685,8 @@ class Global extends ChangeNotifier {
         });
   }
 
-  showEmulate() {
-    if (context == null) return;
-    if (cType != CType.speed) {
-      showError('请切换为速度模式');
-      return;
-    }
-    if (func == null) {
-      showError('请先生成代码');
-      return;
-    }
+  showEmulate() async {
+    if (!(await getFunc())) return;
 
     showDialog(
         context: context!,
