@@ -210,13 +210,16 @@ class Global extends ChangeNotifier {
 
   updatePoints(Offset offset) {
     int index = panIndex;
-    if (index % 2 == 0) {
-      index = index ~/ 2;
+    if (index % 3 == 0) {
+      index = index ~/ 3;
       points[index].x = points[index].x + offset.dx;
       points[index].y = points[index].y + offset.dy;
-    } else {
-      index = index ~/ 2;
+    } else if (index % 3 == 1) {
+      index = index ~/ 3;
       points[index].control = points[index].control + offset;
+    } else {
+      index = index ~/ 3;
+      points[index].control = points[index].control - offset;
     }
     updateController(index);
     notifyListeners();

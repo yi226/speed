@@ -20,6 +20,12 @@ class IndexFunc {
         6);
   }
 
+  static int getControl2Index(Global global, Offset offset) {
+    return global.points.indexWhere((e) =>
+        (Offset(e.x, e.y) - e.control + global.canvasOffset - offset).distance <
+        6);
+  }
+
   static int getSpeedIndex(Global global, Offset offset) {
     return global.sPoints.lastIndexWhere((p) =>
         (global.fromSPoint(p) + global.canvasOffset - offset).distance < 20);
@@ -57,10 +63,15 @@ class CurveWidget extends StatelessWidget {
                               box.globalToLocal(details.globalPosition);
                           int index = IndexFunc.getControlIndex(global, offset);
                           if (index != -1) {
-                            global.panIndex = 2 * index + 1;
+                            global.panIndex = 3 * index + 1;
                           } else {
-                            index = IndexFunc.getIndex(global, offset);
-                            if (index != -1) global.panIndex = 2 * index;
+                            index = IndexFunc.getControl2Index(global, offset);
+                            if (index != -1) {
+                              global.panIndex = 3 * index + 2;
+                            } else {
+                              index = IndexFunc.getIndex(global, offset);
+                              if (index != -1) global.panIndex = 3 * index;
+                            }
                           }
                           if (index != -1) {
                             global.selectedIndex = index;
@@ -80,6 +91,9 @@ class CurveWidget extends StatelessWidget {
                           var offset =
                               box.globalToLocal(details.globalPosition);
                           int index = IndexFunc.getControlIndex(global, offset);
+                          if (index == -1) {
+                            index = IndexFunc.getControl2Index(global, offset);
+                          }
                           if (index == -1) {
                             index = IndexFunc.getIndex(global, offset);
                           }
