@@ -73,6 +73,7 @@ class Info {
               children: [
                 Expanded(
                     child: ListView(children: [Text(snapshot.data ?? info)])),
+                const SizedBox(height: 10),
                 Text('Version: $version'),
                 const SizedBox(height: 10),
                 const Text('开发者: 易鹏飞, 李思宇'),

@@ -114,6 +114,7 @@ class _RectPainter extends CustomPainter {
   final Paint _orange = Paint()..color = Colors.orange;
   final Paint _green = Paint()..color = Colors.green;
   final Paint _teal = Paint()..color = Colors.teal;
+  final Paint _greenOpacity = Paint()..color = Colors.green.withOpacity(0.5);
   final painter = Paint()
     ..color = Colors.blue
     ..style = PaintingStyle.stroke
@@ -123,6 +124,13 @@ class _RectPainter extends CustomPainter {
 
   final controlPainter = Paint()
     ..color = Colors.green
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = true
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = 2.0;
+
+  final control2Painter = Paint()
+    ..color = Colors.green.withOpacity(0.5)
     ..style = PaintingStyle.stroke
     ..isAntiAlias = true
     ..strokeCap = StrokeCap.round
@@ -143,11 +151,14 @@ class _RectPainter extends CustomPainter {
     canvas.drawImage(image, Offset.zero, Paint());
 
     for (var i = 0; i < pointList.length; i++) {
-      Offset center = Offset(pointList[i].x, pointList[i].y);
-      Offset control = center + pointList[i].control;
+      final center = Offset(pointList[i].x, pointList[i].y);
+      final control = center + pointList[i].control;
+      final control2 = center - pointList[i].control;
       canvas.drawCircle(center, 10, i == selectedIndex ? _red : _orange);
+      canvas.drawCircle(control2, 6, _greenOpacity);
       canvas.drawCircle(control, 6, i == selectedIndex ? _green : _teal);
       canvas.drawLine(center, control, controlPainter);
+      canvas.drawLine(center, control2, control2Painter);
     }
 
     if (pointList.length < 2) {
@@ -167,6 +178,7 @@ class _RectPainter extends CustomPainter {
       var x3 = pointList[i + 1].x;
       var y3 = pointList[i + 1].y;
       path.cubicTo(x1, y1, x2, y2, x3, y3);
+      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), control2Painter);
     }
 
     ///绘制 Path

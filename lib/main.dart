@@ -113,7 +113,7 @@ class _MainPageState extends State<MainPage> {
               CommandBarButton(
                   label: const Text("报告(R)"),
                   onPressed: () => global.showSpeedCurve()),
-                  CommandBarButton(
+              CommandBarButton(
                   label: const Text("模拟(E)"),
                   onPressed: () => global.showEmulate()),
               const CommandBarSeparator(),
@@ -129,6 +129,10 @@ class _MainPageState extends State<MainPage> {
                     onChanged: (value) {
                       if (global.image == null) {
                         global.showError('请先选择地图');
+                        return;
+                      }
+                      if (!global.checkControl()) {
+                        global.showError('控制点长度不能为0');
                         return;
                       }
                       if (value != null) {

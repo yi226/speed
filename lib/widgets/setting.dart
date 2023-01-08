@@ -28,6 +28,10 @@ class SettingWidget extends StatelessWidget {
                 leading: const Icon(FluentIcons.picture),
                 title: const Text('图片地址'),
                 subtitle: Text(global.imagePath ?? '未选择'),
+                trailing: Button(
+                  child: const Text('地图'),
+                  onPressed: () => global.setImagePath(),
+                ),
               ),
               const SizedBox(height: 20),
               TextBox(

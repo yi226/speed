@@ -482,11 +482,16 @@ class Global extends ChangeNotifier {
     await prefs.setString(key, value);
   }
 
-  bool checkSPoints() {
+  bool checkControl() {
+    for (var i = 0; i < points.length; i++) {
+      if (points[i].control.distance == 0) return false;
+    }
+    return true;
+  }
+
+  bool checkSpeed() {
     for (var i = 1; i < sPoints.length - 1; i++) {
-      if (sPoints[i].speed == 0) {
-        return false;
-      }
+      if (sPoints[i].speed == 0) return false;
     }
     return true;
   }
@@ -515,7 +520,7 @@ class Global extends ChangeNotifier {
       showError('终止点未设置速度, 请补全');
       return true;
     }
-    if (!checkSPoints()) {
+    if (!checkSpeed()) {
       showError('中间速度点速度不能为0');
       return true;
     }
