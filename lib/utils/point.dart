@@ -10,9 +10,9 @@ class Point {
   Point({
     this.x = 0,
     this.y = 0,
-    this.a = 0,
-    this.w = 0,
-    this.control = const Offset(0, 0),
+    this.a = 0, // 位姿
+    this.w = 0, // 角速度
+    this.control = Offset.zero, // 控制点相对向量
   });
 
   bool equalTo(Point point) {

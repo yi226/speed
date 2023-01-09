@@ -61,8 +61,8 @@ class Info {
     return info;
   }
 
-  showInfo(BuildContext context) {
-    showDialog(
+  Future<bool?> showInfo(BuildContext context) async {
+    return await showDialog(
       context: context,
       builder: (context) => ContentDialog(
         title: const Text('Info'),
@@ -86,7 +86,7 @@ class Info {
             onPressed: () async {
               await deleteInfo();
               // ignore: use_build_context_synchronously
-              Navigator.pop(context);
+              Navigator.pop(context, true);
             },
             child: const Text('更新文档'),
           ),
