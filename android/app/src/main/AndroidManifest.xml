@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.alfie.speed">
+    package="com.example.speed">
    <application
         android:label="speed"
         android:name="${applicationName}"
