@@ -572,23 +572,21 @@ class VerticalProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: width,
       height: height,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          border: Border.all(width: 2, color: Colors.black),
-        ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: SizedBox(
-            height: height * value,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-              ),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        border: Border.all(width: 2, color: Colors.black),
+      ),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          height: height * value,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: const BorderRadius.all(Radius.circular(4.0)),
             ),
           ),
         ),
