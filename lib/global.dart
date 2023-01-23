@@ -60,15 +60,16 @@ class Global extends ChangeNotifier {
       if (kDebugMode) {
         print(setList);
       }
-      if (setList.length != 5) {
+      if (setList.length != 6) {
         while (context == null) {}
         showError('不兼容旧软件, 请重新保存设置');
       } else {
         _mode = setList[0] == 'true' ? ThemeMode.dark : ThemeMode.light;
         imagePath = setList[1] == 'null' ? null : setList[1];
-        _canvasSize = Size(500, double.parse(setList[2]));
-        _resolution = double.parse(setList[3]);
-        robotWidthController.text = setList[4];
+        _pathFilePath = setList[2];
+        _canvasSize = Size(500, double.parse(setList[3]));
+        _resolution = double.parse(setList[4]);
+        robotWidthController.text = setList[5];
         if (imagePath != null) {
           try {
             image = await loadImage(imagePath!,
@@ -98,7 +99,7 @@ class Global extends ChangeNotifier {
   String get appDocDirPath => _appDocDirPath ?? '.';
 
   String get saveString =>
-      '${mode == ThemeMode.dark}@$imagePath@${canvasSize.height}@$resolution@$robotWidth';
+      '${mode == ThemeMode.dark}@$imagePath@$pathFilePath@${canvasSize.height}@$resolution@$robotWidth';
 
   BuildContext? context;
 
@@ -391,9 +392,23 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  String? _pathFilePath;
+  String get pathFilePath =>
+      _pathFilePath ??
+      '$appDocDirPath${Platform.pathSeparator}path${Platform.pathSeparator}';
+
   PathPlanFunc? func;
 
   //* Functions
+  setPathFilePath() async {
+    String? tmpPath = await FilePicker.platform.getDirectoryPath();
+    if (tmpPath != null) {
+      _pathFilePath =
+          '$tmpPath${Platform.pathSeparator}path${Platform.pathSeparator}';
+    }
+    notifyListeners();
+  }
+
   setImagePath() async {
     imagePath = await _getImagePath();
     if (imagePath != null) {
@@ -539,7 +554,7 @@ class Global extends ChangeNotifier {
         robotWidth: robotWidth,
         canvasSize: canvasSize,
         resolution: resolution,
-        appDocDirPath: appDocDirPath);
+        appDocDirPath: pathFilePath);
     if (func == null || (func != null && !(func!.equalTo(funcTmp)))) {
       func = funcTmp;
       showDialog(

@@ -124,9 +124,6 @@ class CommandsBar extends StatelessWidget {
           CommandBarButton(
               label: const Text("导入(I)"), onPressed: () => global.importPath()),
           CommandBarButton(
-              label: const Text("地图(M)"),
-              onPressed: () => global.setImagePath()),
-          CommandBarButton(
               label: const Text("设置(S)"),
               onPressed: () async {
                 await showDialog(

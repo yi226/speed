@@ -34,6 +34,16 @@ class SettingWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(FluentIcons.bold_p),
+                title: const Text('生成地址'),
+                subtitle: Text(global.pathFilePath),
+                trailing: Button(
+                  child: const Text('选择'),
+                  onPressed: () => global.setPathFilePath(),
+                ),
+              ),
+              const SizedBox(height: 20),
               TextBox(
                 header: '图像比例',
                 placeholder:

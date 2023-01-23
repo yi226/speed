@@ -564,11 +564,12 @@ class VerticalProgressBar extends StatelessWidget {
   final double width;
   final double height;
   final double value;
-  const VerticalProgressBar(
-      {super.key,
-      required this.width,
-      required this.height,
-      required this.value});
+  const VerticalProgressBar({
+    super.key,
+    required this.width,
+    required this.height,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -581,13 +582,11 @@ class VerticalProgressBar extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: SizedBox(
+        child: Container(
           height: height * value,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.orange,
-              borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-            ),
+          decoration: BoxDecoration(
+            color: Colors.orange,
+            borderRadius: const BorderRadius.all(Radius.circular(4.0)),
           ),
         ),
       ),

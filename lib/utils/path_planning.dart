@@ -311,12 +311,12 @@ class PathPlanFunc {
     // export to .h file
     int i = 0;
     fileName =
-        '$appDocDirPath${Platform.pathSeparator}path${Platform.pathSeparator}Path$i.h';
+        '$appDocDirPath${Platform.pathSeparator}Path$i.h';
     File file = File(fileName);
     while (file.existsSync()) {
       i++;
       fileName =
-          '$appDocDirPath${Platform.pathSeparator}path${Platform.pathSeparator}Path$i.h';
+          '$appDocDirPath${Platform.pathSeparator}Path$i.h';
       file = File(fileName);
     }
     await file.create(recursive: true);
