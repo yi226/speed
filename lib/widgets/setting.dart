@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:speed/global.dart';
 import 'package:speed/utils/extensions.dart';
 import 'package:speed/utils/input_format.dart';
+import 'package:speed/utils/platform/platform.dart';
 
 class SettingWidget extends StatelessWidget {
   const SettingWidget({super.key});
@@ -38,10 +39,12 @@ class SettingWidget extends StatelessWidget {
                 leading: const Icon(FluentIcons.bold_p),
                 title: const Text('生成地址'),
                 subtitle: Text(global.pathFilePath),
-                trailing: Button(
-                  child: const Text('选择'),
-                  onPressed: () => global.setPathFilePath(),
-                ),
+                trailing: IntegratePlatform.isWeb
+                    ? null
+                    : Button(
+                        child: const Text('选择'),
+                        onPressed: () => global.setPathFilePath(),
+                      ),
               ),
               const SizedBox(height: 20),
               TextBox(

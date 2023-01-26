@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'dart:ui' as ui;
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:speed/utils/platform/platform.dart';
 import 'package:speed/utils/point.dart';
 
 class CAPPoint {
@@ -277,7 +277,7 @@ class PathPlanFunc {
     return r;
   }
 
-  Future<bool> outSpeedPlan() {
+  Future<bool> outSpeedPlan() async {
     String notes =
         '/* ref_x,    ref_y,    ref_theta,   ref_pose,    ref_delta,    ref_v,    ref_preivew*/\n';
     notes += 'const NavigationPoints path_red0[PATHLENGTH0] = {\n';
@@ -304,27 +304,9 @@ class PathPlanFunc {
       notes += '{$x,$y,$theta,$pose,$delta,$v,$pre},   //${i + 1}\n';
     }
     notes += '};\n';
-    return writeToFile(notes);
-  }
-
-  Future<bool> writeToFile(String notes) async {
-    // export to .h file
-    int i = 0;
-    fileName =
-        '$appDocDirPath${Platform.pathSeparator}Path$i.h';
-    File file = File(fileName);
-    while (file.existsSync()) {
-      i++;
-      fileName =
-          '$appDocDirPath${Platform.pathSeparator}Path$i.h';
-      file = File(fileName);
-    }
-    await file.create(recursive: true);
-    File file1 = await file.writeAsString(notes);
-    if (file1.existsSync()) {
-      fileName = file1.path;
-      return true;
-    }
-    return false;
+    List result =
+        await IntegratePlatform.writeToHFile(notes: notes, path: appDocDirPath);
+    fileName = result.last;
+    return result.first;
   }
 }

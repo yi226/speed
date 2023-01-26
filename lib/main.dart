@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:speed/utils/platform/platform.dart';
 import 'package:speed/widgets/control.dart';
 import 'package:speed/widgets/curve.dart';
-import 'package:speed/widgets/info.dart';
 import 'package:speed/widgets/setting.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -13,7 +11,7 @@ import 'global.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  if (IntegratePlatform.isDesktop) {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = const WindowOptions(

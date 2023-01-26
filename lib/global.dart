@@ -1,21 +1,17 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:speed/utils/load_image.dart';
-import 'package:speed/utils/path_file.dart';
 import 'package:speed/utils/path_planning.dart';
+import 'package:speed/utils/platform/platform.dart';
 import 'package:speed/utils/point.dart';
 import 'dart:ui' as ui;
 
 import 'package:speed/widgets/chart.dart';
 import 'package:speed/widgets/curve.dart';
-import 'package:speed/widgets/info.dart';
 
 // 规划模式
 enum CType {
@@ -42,12 +38,6 @@ class Global extends ChangeNotifier {
   }
 
   initPath() async {
-    if (Platform.isWindows || Platform.isLinux) {
-      _appDocDirPath = Directory.current.path;
-    } else {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      _appDocDirPath = appDocDir.path;
-    }
     if (kDebugMode) {
       print(appDocDirPath);
     }
@@ -70,9 +60,10 @@ class Global extends ChangeNotifier {
         _canvasSize = Size(500, double.parse(setList[3]));
         _resolution = double.parse(setList[4]);
         robotWidthController.text = setList[5];
-        if (imagePath != null) {
+        if (imagePath != null && !IntegratePlatform.isWeb) {
           try {
-            image = await loadImage(imagePath!,
+            image = await loadImage(
+                path: imagePath!,
                 height: _canvasSize.height.toInt(),
                 width: _canvasSize.width.toInt());
           } catch (e) {
@@ -395,7 +386,7 @@ class Global extends ChangeNotifier {
   String? _pathFilePath;
   String get pathFilePath =>
       _pathFilePath ??
-      '$appDocDirPath${Platform.pathSeparator}path${Platform.pathSeparator}';
+      '$appDocDirPath${IntegratePlatform.pathSeparator}path${IntegratePlatform.pathSeparator}';
 
   PathPlanFunc? func;
 
@@ -404,16 +395,28 @@ class Global extends ChangeNotifier {
     String? tmpPath = await FilePicker.platform.getDirectoryPath();
     if (tmpPath != null) {
       _pathFilePath =
-          '$tmpPath${Platform.pathSeparator}path${Platform.pathSeparator}';
+          '$tmpPath${IntegratePlatform.pathSeparator}path${IntegratePlatform.pathSeparator}';
     }
     notifyListeners();
   }
 
   setImagePath() async {
-    imagePath = await _getImagePath();
-    if (imagePath != null) {
-      image = await loadImage(imagePath!,
-          height: _canvasSize.height.toInt(), width: _canvasSize.width.toInt());
+    FilePickerResult? result = await FilePicker.platform
+        .pickFiles(type: FileType.image, withData: IntegratePlatform.isWeb);
+    if (result != null) {
+      if (IntegratePlatform.isWeb) {
+        imagePath = '/';
+        image = await loadImage(
+            imageList: result.files.single.bytes,
+            height: _canvasSize.height.toInt(),
+            width: _canvasSize.width.toInt());
+      } else {
+        imagePath = result.files.single.path;
+        image = await loadImage(
+            path: imagePath!,
+            height: _canvasSize.height.toInt(),
+            width: _canvasSize.width.toInt());
+      }
     } else {
       image?.dispose();
       image = null;
@@ -423,16 +426,6 @@ class Global extends ChangeNotifier {
       cType = CType.path;
     }
     notifyListeners();
-  }
-
-  Future<String?> _getImagePath() async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.image);
-    if (result != null) {
-      return result.files.single.path;
-    } else {
-      return null;
-    }
   }
 
   Offset posTransFrom({double? x, double? y, Offset? p}) {
@@ -584,13 +577,13 @@ class Global extends ChangeNotifier {
 
   exportPath() async {
     String? outputFile;
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    if (IntegratePlatform.isDesktop) {
       outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Please select an output file:',
         fileName: 'path.json',
       );
     } else {
-      outputFile = '$appDocDirPath${Platform.pathSeparator}path.json';
+      outputFile = '$appDocDirPath${IntegratePlatform.pathSeparator}path.json';
     }
 
     if (outputFile != null) {
@@ -606,24 +599,22 @@ class Global extends ChangeNotifier {
   }
 
   importPath() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null && result.files.single.path != null) {
-      List tmp = await PathFile.importPath(result.files.single.path!);
-      if (tmp.length != 5) {
-        showError(tmp.first.toString());
-        return;
-      }
-      _canvasSize = tmp[0];
-      _resolution = tmp[1];
-      robotWidthController.text = tmp[2].toString();
-      points = tmp[3] as List<Point>;
-      sPoints = tmp[4] as List<SpeedPoint>;
-      _selectedIndex = -1;
-      _selectedSIndex = -1;
-      _canvasOffset = Offset.zero;
-      cType = CType.path;
-      notifyListeners();
+    List? tmp = await PathFile.importPath();
+    if (tmp == null) return;
+    if (tmp.length != 5) {
+      showError(tmp.first.toString());
+      return;
     }
+    _canvasSize = tmp[0];
+    _resolution = tmp[1];
+    robotWidthController.text = tmp[2].toString();
+    points = tmp[3] as List<Point>;
+    sPoints = tmp[4] as List<SpeedPoint>;
+    _selectedIndex = -1;
+    _selectedSIndex = -1;
+    _canvasOffset = Offset.zero;
+    cType = CType.path;
+    notifyListeners();
   }
 
   showSpeedCurve() async {

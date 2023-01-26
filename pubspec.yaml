@@ -35,13 +35,12 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  fluent_ui: ^4.0.3
-  provider: ^6.0.4
-  file_picker: ^5.2.2
-  shared_preferences: ^2.0.15
-  window_manager: ^0.2.8
-  path_provider: ^2.0.11
+  fluent_ui: ^4.1.5
+  provider: ^6.0.5
+  file_picker: ^5.2.5
+  shared_preferences: ^2.0.17
+  window_manager: ^0.3.0
+  path_provider: ^2.0.12
   fl_chart: ^0.55.2
   dio: ^4.0.6
 

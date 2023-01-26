@@ -38,87 +38,76 @@ class CurveWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final global = context.watch<Global>();
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(width: 2, color: Colors.black),
-          ),
-          child: (global.image == null)
-              ? SizedBox(
-                  width: global.canvasSize.width,
-                  height: global.canvasSize.height,
-                  child: const FlutterLogo())
-              : Builder(
-                  builder: (context) {
-                    return MouseRegion(
-                      onHover: (event) {
-                        global.cursorPosition = event.localPosition;
-                      },
-                      child: GestureDetector(
-                        onPanStart: (details) {
-                          var box = context.findRenderObject() as RenderBox;
-                          var offset =
-                              box.globalToLocal(details.globalPosition);
-                          int index = IndexFunc.getControlIndex(global, offset);
-                          if (index != -1) {
-                            global.panIndex = 3 * index + 1;
-                          } else {
-                            index = IndexFunc.getControl2Index(global, offset);
-                            if (index != -1) {
-                              global.panIndex = 3 * index + 2;
-                            } else {
-                              index = IndexFunc.getIndex(global, offset);
-                              if (index != -1) global.panIndex = 3 * index;
-                            }
-                          }
-                          if (index != -1) {
-                            global.selectedIndex = index;
-                          } else {
-                            global.panIndex = -1;
-                          }
-                        },
-                        onPanUpdate: (details) {
-                          if (global.panIndex != -1) {
-                            global.updatePoints(details.delta);
-                          } else {
-                            global.canvasOffset += details.delta;
-                          }
-                        },
-                        onTapDown: (details) {
-                          var box = context.findRenderObject() as RenderBox;
-                          var offset =
-                              box.globalToLocal(details.globalPosition);
-                          int index = IndexFunc.getControlIndex(global, offset);
-                          if (index == -1) {
-                            index = IndexFunc.getControl2Index(global, offset);
-                          }
-                          if (index == -1) {
-                            index = IndexFunc.getIndex(global, offset);
-                          }
-                          if (index != -1) {
-                            global.selectedIndex = index;
-                          }
-                        },
-                        child: ClipRect(
-                          child: CustomPaint(
-                            size: global.canvasSize,
-                            painter: _RectPainter(
-                              global.points,
-                              global.image!,
-                              global.canvasOffset,
-                              global.selectedIndex,
-                            ),
-                          ),
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(width: 2, color: Colors.black),
+        ),
+        child: (global.image == null)
+            ? SizedBox(
+                width: global.canvasSize.width,
+                height: global.canvasSize.height,
+                child: const FlutterLogo())
+            : Builder(
+                builder: (context) {
+                  return GestureDetector(
+                    onPanStart: (details) {
+                      var box = context.findRenderObject() as RenderBox;
+                      var offset = box.globalToLocal(details.globalPosition);
+                      int index = IndexFunc.getControlIndex(global, offset);
+                      if (index != -1) {
+                        global.panIndex = 3 * index + 1;
+                      } else {
+                        index = IndexFunc.getControl2Index(global, offset);
+                        if (index != -1) {
+                          global.panIndex = 3 * index + 2;
+                        } else {
+                          index = IndexFunc.getIndex(global, offset);
+                          if (index != -1) global.panIndex = 3 * index;
+                        }
+                      }
+                      if (index != -1) {
+                        global.selectedIndex = index;
+                      } else {
+                        global.panIndex = -1;
+                      }
+                    },
+                    onPanUpdate: (details) {
+                      if (global.panIndex != -1) {
+                        global.updatePoints(details.delta);
+                      } else {
+                        global.canvasOffset += details.delta;
+                      }
+                    },
+                    onTapDown: (details) {
+                      var box = context.findRenderObject() as RenderBox;
+                      var offset = box.globalToLocal(details.globalPosition);
+                      int index = IndexFunc.getControlIndex(global, offset);
+                      if (index == -1) {
+                        index = IndexFunc.getControl2Index(global, offset);
+                      }
+                      if (index == -1) {
+                        index = IndexFunc.getIndex(global, offset);
+                      }
+                      if (index != -1) {
+                        global.selectedIndex = index;
+                      }
+                    },
+                    child: ClipRect(
+                      child: CustomPaint(
+                        size: global.canvasSize,
+                        painter: _RectPainter(
+                          global.points,
+                          global.image!,
+                          global.canvasOffset,
+                          global.selectedIndex,
                         ),
                       ),
-                    );
-                  },
-                ),
-        ),
-        Text(global.cursorPosition.toString()),
-      ],
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 }
@@ -211,61 +200,52 @@ class SCurveWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final global = context.watch<Global>();
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(width: 2, color: Colors.black),
-          ),
-          child: (global.image == null)
-              ? SizedBox(
-                  width: global.canvasSize.width,
-                  height: global.canvasSize.height,
-                  child: const FlutterLogo())
-              : Builder(builder: (context) {
-                  return MouseRegion(
-                    onHover: (event) {
-                      global.cursorPosition = event.localPosition;
-                    },
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        global.canvasOffset += details.delta;
-                      },
-                      onTapDown: (details) {
-                        var box = context.findRenderObject() as RenderBox;
-                        var offset = box.globalToLocal(details.globalPosition);
-                        int index = IndexFunc.getIndex(global, offset);
-                        if (index != -1) {
-                          global.selectedIndex = index;
-                        }
-                      },
-                      onSecondaryTapDown: (details) {
-                        var box = context.findRenderObject() as RenderBox;
-                        var offset = box.globalToLocal(details.globalPosition);
-                        int index = IndexFunc.getSpeedIndex(global, offset);
-                        if (index != -1) {
-                          global.selectedSIndex = index;
-                        }
-                      },
-                      child: ClipRect(
-                        child: CustomPaint(
-                            size: global.canvasSize,
-                            painter: _SRectPainter(
-                                global.points,
-                                global.sPoints,
-                                global.image!,
-                                global.canvasOffset,
-                                global.selectedIndex,
-                                global.selectedSIndex,
-                                global.resolution)),
-                      ),
-                    ),
-                  );
-                }),
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(width: 2, color: Colors.black),
         ),
-        Text(global.cursorPosition.toString()),
-      ],
+        child: (global.image == null)
+            ? SizedBox(
+                width: global.canvasSize.width,
+                height: global.canvasSize.height,
+                child: const FlutterLogo())
+            : Builder(builder: (context) {
+                return GestureDetector(
+                  onPanUpdate: (details) {
+                    global.canvasOffset += details.delta;
+                  },
+                  onTapDown: (details) {
+                    var box = context.findRenderObject() as RenderBox;
+                    var offset = box.globalToLocal(details.globalPosition);
+                    int index = IndexFunc.getIndex(global, offset);
+                    if (index != -1) {
+                      global.selectedIndex = index;
+                    }
+                  },
+                  onSecondaryTapDown: (details) {
+                    var box = context.findRenderObject() as RenderBox;
+                    var offset = box.globalToLocal(details.globalPosition);
+                    int index = IndexFunc.getSpeedIndex(global, offset);
+                    if (index != -1) {
+                      global.selectedSIndex = index;
+                    }
+                  },
+                  child: ClipRect(
+                    child: CustomPaint(
+                        size: global.canvasSize,
+                        painter: _SRectPainter(
+                            global.points,
+                            global.sPoints,
+                            global.image!,
+                            global.canvasOffset,
+                            global.selectedIndex,
+                            global.selectedSIndex,
+                            global.resolution)),
+                  ),
+                );
+              }),
+      ),
     );
   }
 }
