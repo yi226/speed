@@ -63,10 +63,7 @@ class Global extends ChangeNotifier {
         robotWidthController.text = setList[5];
         if (imagePath != null && !IntegratePlatform.isWeb) {
           try {
-            image = await loadImage(
-                path: imagePath!,
-                height: _canvasSize.height.toInt(),
-                width: _canvasSize.width.toInt());
+            image = await loadImage(path: imagePath!);
           } catch (e) {
             while (context == null) {}
             showError(e.toString());
@@ -370,13 +367,6 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
-  Offset _cursorPosition = Offset.zero;
-  Offset get cursorPosition => _cursorPosition;
-  set cursorPosition(Offset offset) {
-    _cursorPosition = posTransFrom(p: offset - canvasOffset);
-    notifyListeners();
-  }
-
   ChartType _chartType = ChartType.v;
   ChartType get chartType => _chartType;
   set chartType(ChartType type) {
@@ -407,16 +397,10 @@ class Global extends ChangeNotifier {
     if (result != null) {
       if (IntegratePlatform.isWeb) {
         imagePath = '/';
-        image = await loadImage(
-            imageList: result.files.single.bytes,
-            height: _canvasSize.height.toInt(),
-            width: _canvasSize.width.toInt());
+        image = await loadImage(imageList: result.files.single.bytes);
       } else {
         imagePath = result.files.single.path;
-        image = await loadImage(
-            path: imagePath!,
-            height: _canvasSize.height.toInt(),
-            width: _canvasSize.width.toInt());
+        image = await loadImage(path: imagePath!);
       }
     } else {
       image?.dispose();

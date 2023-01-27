@@ -305,7 +305,7 @@ class PathPlanFunc {
     }
     notes += '};\n';
     List result =
-        await IntegratePlatform.writeToHFile(notes: notes, path: appDocDirPath);
+        await PathFile.writeToHFile(notes: notes, path: appDocDirPath);
     fileName = result.last;
     return result.first;
   }

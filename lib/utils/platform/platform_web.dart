@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:async';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:speed/utils/point.dart';
 import 'package:flutter/material.dart';
 
@@ -16,14 +17,6 @@ class IntegratePlatform {
 
   static Future<String> getDirectory() async {
     return '.';
-  }
-
-  static Future<List> writeToHFile(
-      {required String notes, required String path}) async {
-    // export to .h file
-    String fileName = "Path.h";
-    WebFile.outFile(notes: notes, fileName: fileName);
-    return [true, fileName];
   }
 }
 
@@ -39,15 +32,21 @@ class WebFile {
   }
 }
 
-Future<ui.Image> loadImage(
-    {String? path, Uint8List? imageList, int? height, int? width}) async {
-  ui.Codec codec = await ui.instantiateImageCodec(imageList!,
-      targetHeight: height, targetWidth: width);
+Future<ui.Image> loadImage({String? path, Uint8List? imageList}) async {
+  ui.Codec codec = await ui.instantiateImageCodec(imageList!);
   ui.FrameInfo frame = await codec.getNextFrame();
   return frame.image;
 }
 
 class PathFile {
+  static Future<List> writeToHFile(
+      {required String notes, required String path}) async {
+    // export to .h file
+    String fileName = "Path.h";
+    WebFile.outFile(notes: notes, fileName: fileName);
+    return [true, fileName];
+  }
+
   static Future<String?> writeToJSONFile(String notes, String path) async {
     // export to .json file
     String fileName = "path.json";
@@ -93,7 +92,49 @@ class PathFile {
   }
 
   static Future<List?> importPath() async {
-    return ['Web 暂不支持'];
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+      withData: true,
+    );
+    if (result != null) {
+      try {
+        String setString = String.fromCharCodes(result.files.single.bytes!);
+        Map sets = json.decode(setString);
+        double width = sets["width"];
+        double height = sets["height"];
+        Size canvasSize = Size(width, height);
+        double resolution = sets["resolution"];
+        double robotWidth = sets["robotWidth"];
+        List pointsMap = sets["points"];
+        List sPointsMap = sets["sPoints"];
+        List<Point> points = [];
+        List<SpeedPoint> sPoints = [];
+        for (var i = 0; i < pointsMap.length; i++) {
+          double x =
+              posTransTo(canvasSize, resolution, x: pointsMap[i]["x"]).dx;
+          double y =
+              posTransTo(canvasSize, resolution, y: pointsMap[i]["y"]).dy;
+          double a = pointsMap[i]["a"];
+          double w = pointsMap[i]["w"];
+          double dx = pointsMap[i]["dx"] / resolution;
+          double dy = pointsMap[i]["dy"] / (-resolution);
+          points.add(Point(x: x, y: y, a: a, w: w, control: Offset(dx, dy)));
+        }
+        for (var i = 0; i < sPointsMap.length; i++) {
+          int pointIndex = sPointsMap[i]["index"];
+          double t = sPointsMap[i]["t"];
+          double speed = sPointsMap[i]["speed"] / resolution;
+          int lead = sPointsMap[i]["lead"];
+          sPoints.add(SpeedPoint(
+              pointIndex: pointIndex, t: t, speed: speed, lead: lead));
+        }
+        return [canvasSize, resolution, robotWidth, points, sPoints];
+      } catch (e) {
+        return [e.toString()];
+      }
+    }
+    return null;
   }
 
   static Offset posTransFrom(Size canvasSize, double resolution,
@@ -110,6 +151,25 @@ class PathFile {
       r = r.translate(p.dx - o.dx, o.dy - p.dy);
     }
     r = r * resolution;
+    return r;
+  }
+
+  static Offset posTransTo(Size canvasSize, double resolution,
+      {double? x, double? y, Offset? p}) {
+    Offset r = Offset.zero;
+    Offset o = Offset(canvasSize.width * 0.5, canvasSize.height);
+    if (x != null) {
+      x /= resolution;
+      r = r.translate(x + o.dx, 0);
+    }
+    if (y != null) {
+      y /= resolution;
+      r = r.translate(0, o.dy - y);
+    }
+    if (p != null) {
+      p /= resolution;
+      r = r.translate(p.dx + o.dx, o.dy - p.dy);
+    }
     return r;
   }
 }

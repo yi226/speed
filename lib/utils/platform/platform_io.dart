@@ -27,7 +27,16 @@ class IntegratePlatform {
     }
     return path;
   }
+}
 
+Future<ui.Image> loadImage({String? path, Uint8List? imageList}) async {
+  var list = await File(path!).readAsBytes();
+  ui.Codec codec = await ui.instantiateImageCodec(list);
+  ui.FrameInfo frame = await codec.getNextFrame();
+  return frame.image;
+}
+
+class PathFile {
   static Future<List> writeToHFile(
       {required String notes, required String path}) async {
     // export to .h file
@@ -47,18 +56,7 @@ class IntegratePlatform {
     }
     return [false, fileName];
   }
-}
 
-Future<ui.Image> loadImage(
-    {String? path, Uint8List? imageList, int? height, int? width}) async {
-  var list = await File(path!).readAsBytes();
-  ui.Codec codec = await ui.instantiateImageCodec(list,
-      targetHeight: height, targetWidth: width);
-  ui.FrameInfo frame = await codec.getNextFrame();
-  return frame.image;
-}
-
-class PathFile {
   static Future<String?> writeToJSONFile(String notes, String path) async {
     // export to .json file
     File file = File(path);
@@ -110,6 +108,7 @@ class PathFile {
 
   static Future<List?> importPath() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
       allowedExtensions: ['json'],
     );
     if (result != null && result.files.single.path != null) {

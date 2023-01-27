@@ -100,6 +100,7 @@ class CurveWidget extends StatelessWidget {
                           global.points,
                           global.image!,
                           global.canvasOffset,
+                          global.canvasSize,
                           global.selectedIndex,
                         ),
                       ),
@@ -143,15 +144,21 @@ class _RectPainter extends CustomPainter {
   final ui.Image image;
   final int selectedIndex;
   final Offset canvasOffset;
+  final Size canvasSize;
 
-  _RectPainter(
-      this.pointList, this.image, this.canvasOffset, this.selectedIndex);
+  _RectPainter(this.pointList, this.image, this.canvasOffset, this.canvasSize,
+      this.selectedIndex);
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.translate(canvasOffset.dx, canvasOffset.dy);
 
-    canvas.drawImage(image, Offset.zero, Paint());
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height),
+      Paint(),
+    );
 
     for (var i = 0; i < pointList.length; i++) {
       final center = Offset(pointList[i].x, pointList[i].y);
@@ -235,13 +242,15 @@ class SCurveWidget extends StatelessWidget {
                     child: CustomPaint(
                         size: global.canvasSize,
                         painter: _SRectPainter(
-                            global.points,
-                            global.sPoints,
-                            global.image!,
-                            global.canvasOffset,
-                            global.selectedIndex,
-                            global.selectedSIndex,
-                            global.resolution)),
+                          global.points,
+                          global.sPoints,
+                          global.image!,
+                          global.canvasOffset,
+                          global.canvasSize,
+                          global.selectedIndex,
+                          global.selectedSIndex,
+                          global.resolution,
+                        )),
                   ),
                 );
               }),
@@ -273,13 +282,22 @@ class _SRectPainter extends CustomPainter {
   final int selectedIndex;
   final int selectedSIndex;
   final Offset canvasOffset;
+  final Size canvasSize;
   final List<SpeedPoint> sPointList;
   final double resolution;
   SpeedPoint? get nPoint =>
       selectedSIndex < 0 ? null : sPointList[selectedSIndex];
 
-  _SRectPainter(this.pointList, this.sPointList, this.image, this.canvasOffset,
-      this.selectedIndex, this.selectedSIndex, this.resolution);
+  _SRectPainter(
+    this.pointList,
+    this.sPointList,
+    this.image,
+    this.canvasOffset,
+    this.canvasSize,
+    this.selectedIndex,
+    this.selectedSIndex,
+    this.resolution,
+  );
 
   ui.Tangent _getPoint(int i, double t) {
     var path = Path();
@@ -301,7 +319,12 @@ class _SRectPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.translate(canvasOffset.dx, canvasOffset.dy);
 
-    canvas.drawImage(image, Offset.zero, Paint());
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height),
+      Paint(),
+    );
 
     if (pointList.length < 2) {
       return;
@@ -423,6 +446,7 @@ class _ECurveWidgetState extends State<ECurveWidget>
                       painter: _ERectPainter(
                           widget.pointList,
                           widget.image,
+                          widget.canvasSize,
                           widget.rPointList[getIndex(_controller.value)],
                           widget.posTransTo))),
             ),
@@ -474,14 +498,21 @@ class _ERectPainter extends CustomPainter {
 
   final List<Point> pointList;
   final ui.Image image;
+  final Size canvasSize;
   final CAPPoint rPoint;
   Function posTransTo;
 
-  _ERectPainter(this.pointList, this.image, this.rPoint, this.posTransTo);
+  _ERectPainter(this.pointList, this.image, this.canvasSize, this.rPoint,
+      this.posTransTo);
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawImage(image, Offset.zero, Paint());
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height),
+      Paint(),
+    );
 
     if (pointList.length < 2) {
       return;
