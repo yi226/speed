@@ -537,6 +537,7 @@ class Global extends ChangeNotifier {
       func = funcTmp;
       showDialog(
         context: context!,
+        barrierDismissible: false,
         builder: (context) => const AlertDialog(
           title: Text('生成中'),
           content: LinearProgressIndicator(),
