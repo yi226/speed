@@ -8,7 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:speed/utils/point.dart';
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 
 class IntegratePlatform {
   static bool get isDesktop =>
@@ -250,25 +250,28 @@ class Info {
   Future<bool?> showInfo(BuildContext context) async {
     return await showDialog(
       context: context,
-      builder: (context) => ContentDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Info'),
         content: FutureBuilder(
           future: getInfo(),
           builder: ((context, snapshot) {
-            return Column(
-              children: [
-                Expanded(
-                    child: ListView(children: [Text(snapshot.data ?? info)])),
-                const SizedBox(height: 10),
-                Text('Version: $version'),
-                const SizedBox(height: 10),
-                const Text('开发者: 易鹏飞, 李思宇'),
-              ],
+            return SizedBox(
+              width: 400,
+              child: Column(
+                children: [
+                  Expanded(
+                      child: ListView(children: [Text(snapshot.data ?? info)])),
+                  const SizedBox(height: 10),
+                  Text('Version: $version'),
+                  const SizedBox(height: 10),
+                  const Text('开发者: 易鹏飞, 李思宇'),
+                ],
+              ),
             );
           }),
         ),
         actions: [
-          Button(
+          TextButton(
             onPressed: () async {
               await deleteInfo();
               // ignore: use_build_context_synchronously
@@ -276,7 +279,7 @@ class Info {
             },
             child: const Text('更新文档'),
           ),
-          FilledButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
           ),

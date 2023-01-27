@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,6 +38,7 @@ class Global extends ChangeNotifier {
   }
 
   initPath() async {
+    _appDocDirPath = await IntegratePlatform.getDirectory();
     if (kDebugMode) {
       print(appDocDirPath);
     }
@@ -142,7 +143,7 @@ class Global extends ChangeNotifier {
   }
 
   updateSController() {
-    if (selectedSIndex == -1) {
+    if (selectedSIndex < 0) {
       return;
     }
     var p = _getPoint(
@@ -552,9 +553,9 @@ class Global extends ChangeNotifier {
       func = funcTmp;
       showDialog(
         context: context!,
-        builder: (context) => const ContentDialog(
+        builder: (context) => const AlertDialog(
           title: Text('生成中'),
-          content: ProgressBar(),
+          content: LinearProgressIndicator(),
         ),
       );
       await Future.delayed(const Duration(milliseconds: 200));
@@ -625,15 +626,16 @@ class Global extends ChangeNotifier {
         context: context!,
         builder: (BuildContext context) {
           final global = context.watch<Global>();
-          return ContentDialog(
+          return AlertDialog(
             title: Text('${global.chartType.name}曲线'),
-            content: ChartWidget(points: rPoints, type: chartType),
-            constraints: const BoxConstraints(maxWidth: 600),
+            content: SizedBox(
+                width: 600,
+                child: ChartWidget(points: rPoints, type: chartType)),
             actions: [
-              ComboBox(
+              DropdownButton(
                 value: global.chartType.name,
                 items: ChartType.values
-                    .map((e) => ComboBoxItem(
+                    .map((e) => DropdownMenuItem(
                           value: e.name,
                           child: Text(e.name),
                         ))
@@ -659,20 +661,13 @@ class Global extends ChangeNotifier {
     showDialog(
         context: context!,
         builder: (BuildContext context) {
-          return ContentDialog(
+          return AlertDialog(
             content: ECurveWidget(
                 pointList: points,
                 image: image!,
                 rPointList: func!.rPoints,
                 canvasSize: canvasSize,
                 posTransTo: posTransTo),
-            constraints: const BoxConstraints(maxWidth: 600),
-            actions: [
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
           );
         });
   }
@@ -689,11 +684,11 @@ class Global extends ChangeNotifier {
     if (context == null) return;
     showDialog(
       context: context!,
-      builder: (context) => ContentDialog(
+      builder: (context) => AlertDialog(
         title: Text(title),
         content: Text(content),
         actions: [
-          FilledButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
           ),

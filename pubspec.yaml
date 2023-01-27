@@ -35,7 +35,6 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  fluent_ui: ^4.1.5
   provider: ^6.0.5
   file_picker: ^5.2.5
   shared_preferences: ^2.0.17

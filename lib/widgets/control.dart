@@ -1,4 +1,4 @@
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/global.dart';
 import 'package:speed/utils/extensions.dart';
@@ -11,18 +11,18 @@ class ControlWidget extends StatelessWidget {
   Future<bool?> showAlert(BuildContext context) async {
     return showDialog<bool>(
       context: context,
-      builder: (context) => ContentDialog(
+      builder: (context) => AlertDialog(
         title: const Text('温馨提示'),
         content: const Text('您确定要删除吗?'),
         actions: [
-          Button(
+          TextButton(
             child: const Text('Delete'),
             onPressed: () {
               Navigator.pop(context, true);
               // Delete file here
             },
           ),
-          FilledButton(
+          ElevatedButton(
             child: const Text('Cancel'),
             onPressed: () => Navigator.pop(context, false),
           ),
@@ -45,19 +45,26 @@ class ControlWidget extends StatelessWidget {
       Row(
         children: [
           Expanded(
-            child: TextBox(
-              header: 'X(mm)',
-              placeholder: 'mm',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('X(mm)'),
+                helperText: 'mm',
+                border: OutlineInputBorder(),
+              ),
               enabled: enabled,
               controller: x,
               onSubmitted: (value) => onUpdate(0, value),
               inputFormatters: [XNumberTextInputFormatter()],
             ),
           ),
+          const SizedBox(width: 10),
           Expanded(
-            child: TextBox(
-              header: 'Y(mm)',
-              placeholder: 'mm',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('Y(mm)'),
+                helperText: 'mm',
+                border: OutlineInputBorder(),
+              ),
               enabled: enabled,
               controller: y,
               onSubmitted: (value) => onUpdate(1, value),
@@ -72,9 +79,12 @@ class ControlWidget extends StatelessWidget {
       Row(
         children: [
           Expanded(
-            child: TextBox(
-              header: 'Lambda(mm)',
-              placeholder: 'mm',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('Lambda(mm)'),
+                helperText: 'mm',
+                border: OutlineInputBorder(),
+              ),
               enabled: enabled,
               controller: d,
               onSubmitted: (value) => onUpdate(2, value),
@@ -83,10 +93,14 @@ class ControlWidget extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 10),
           Expanded(
-            child: TextBox(
-              header: 'Theta(o)',
-              placeholder: 'o',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('Theta(mm)'),
+                helperText: 'o',
+                border: OutlineInputBorder(),
+              ),
               enabled: enabled,
               controller: t,
               onSubmitted: (value) => onUpdate(3, value),
@@ -101,19 +115,26 @@ class ControlWidget extends StatelessWidget {
       Row(
         children: [
           Expanded(
-            child: TextBox(
-              header: 'w(o/s)',
-              placeholder: '角速度',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('w(o/s)'),
+                helperText: '角速度',
+                border: OutlineInputBorder(),
+              ),
               enabled: enabled,
               controller: w,
               onSubmitted: (value) => onUpdate(4, value),
               inputFormatters: [XNumberTextInputFormatter()],
             ),
           ),
+          const SizedBox(width: 10),
           Expanded(
-            child: TextBox(
-              header: 'a(o)',
-              placeholder: '位姿',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('a(o)'),
+                helperText: '位姿',
+                border: OutlineInputBorder(),
+              ),
               enabled: enabled,
               controller: a,
               onSubmitted: (value) => onUpdate(5, value),
@@ -151,56 +172,56 @@ class ControlWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: const Icon(FluentIcons.location),
-              title: Text(global.cType.name),
-              subtitle: Text('第${global.selectedIndex + 1}个点'),
-              trailing: Row(
-                children: [
-                  FilledButton(
-                    style: ButtonStyle(
-                        backgroundColor: ButtonState.all(
-                            global.selectedIndex != -1
-                                ? Colors.red
-                                : Colors.grey)),
-                    onPressed: () async {
-                      if (global.selectedIndex == -1) {
-                        return;
-                      }
-                      final result = await showAlert(context);
-                      if (result == true) {
-                        global.deletePoints();
-                      }
-                    },
-                    child: const Text('删除'),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                title: Text(global.cType.name),
+                subtitle: Text('第${global.selectedIndex + 1}个点'),
+                trailing: SizedBox(
+                  width: 280,
+                  child: Row(
+                    children: [
+                      FilledButton(
+                        onPressed: () async {
+                          if (global.selectedIndex == -1) {
+                            return;
+                          }
+                          final result = await showAlert(context);
+                          if (result == true) {
+                            global.deletePoints();
+                          }
+                        },
+                        child: const Text('删除'),
+                      ),
+                      const SizedBox(width: 10),
+                      FilledButton(
+                        onPressed: (() => addPoint(global)),
+                        child: const Text('在此后加点'),
+                      ),
+                      const SizedBox(width: 10),
+                      FilledButton(
+                        onPressed: () {
+                          global.canvasOffset = Offset.zero;
+                        },
+                        child: const Text('图片归位'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 30),
-                  FilledButton(
-                    onPressed: (() => addPoint(global)),
-                    child: const Text('在此后加点'),
-                  ),
-                  const SizedBox(width: 30),
-                  FilledButton(
-                    onPressed: () {
-                      global.canvasOffset = Offset.zero;
-                    },
-                    child: const Text('图片归位'),
-                  ),
-                ],
+                ),
               ),
-            ),
-            ...inputWidget(global.selectedIndex != -1,
-                (int type, String value) {
-              if (value.isEmpty) {
-                return;
-              }
-              global.setPoints(type, value.toDouble());
-            }, global.xController, global.yController, global.dController,
-                global.tController, global.wController, global.aController),
-          ],
+              ...inputWidget(global.selectedIndex != -1,
+                  (int type, String value) {
+                if (value.isEmpty) {
+                  return;
+                }
+                global.setPoints(type, value.toDouble());
+              }, global.xController, global.yController, global.dController,
+                  global.tController, global.wController, global.aController),
+            ],
+          ),
         ),
       ),
     );
@@ -215,17 +236,22 @@ class SControlWidget extends StatelessWidget {
       Row(
         children: [
           Expanded(
-            child: TextBox(
-              header: 'X(mm)',
-              placeholder: 'mm',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('X(mm)'),
+                border: OutlineInputBorder(),
+              ),
               controller: x,
               readOnly: true,
             ),
           ),
+          const SizedBox(width: 10),
           Expanded(
-            child: TextBox(
-              header: 'Y(mm)',
-              placeholder: 'mm',
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text('Y(mm)'),
+                border: OutlineInputBorder(),
+              ),
               controller: y,
               readOnly: true,
             ),
@@ -233,16 +259,20 @@ class SControlWidget extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 20),
-      TextBox(
-        header: 'Theta(o)',
-        placeholder: 'o',
+      TextField(
+        decoration: const InputDecoration(
+          label: Text('Theta(o)'),
+          border: OutlineInputBorder(),
+        ),
         controller: theta,
         readOnly: true,
       ),
       const SizedBox(height: 20),
-      TextBox(
-        header: 'Speed(mm/s)',
-        placeholder: 'mm/s',
+      TextField(
+        decoration: const InputDecoration(
+          label: Text('Speed(mm/s)'),
+          border: OutlineInputBorder(),
+        ),
         controller: s,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
@@ -254,9 +284,11 @@ class SControlWidget extends StatelessWidget {
         inputFormatters: [XNumberTextInputFormatter(isAllowNegative: false)],
       ),
       const SizedBox(height: 20),
-      TextBox(
-        header: '超前滞后',
-        placeholder: '个数',
+      TextField(
+        decoration: const InputDecoration(
+          label: Text('超前滞后'),
+          border: OutlineInputBorder(),
+        ),
         controller: l,
         onSubmitted: (value) {
           if (value.isNotEmpty) {
@@ -276,117 +308,118 @@ class SControlWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: const Icon(FluentIcons.location),
-              title: Text(global.cType.name),
-              subtitle: Text(
-                  '第${global.selectedSIndex + 1}/${global.sPoints.length}个点'),
-              trailing: Row(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                title: Text(global.cType.name),
+                subtitle: Text(
+                    '第${global.selectedSIndex + 1}/${global.sPoints.length}点'),
+                trailing: SizedBox(
+                  width: 285,
+                  child: Row(
+                    children: [
+                      FilledButton(
+                        onPressed: () {
+                          global.addSPoint();
+                        },
+                        child: Text('第${global.selectedIndex + 1}个路径点添加速度点'),
+                      ),
+                      const SizedBox(width: 10),
+                      FilledButton(
+                        onPressed: () {
+                          global.canvasOffset = Offset.zero;
+                        },
+                        child: const Text('图片归位'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              ...inputWidget(
+                  global.xSController,
+                  global.ySController,
+                  global.tSController,
+                  global.sController,
+                  global.lController,
+                  global.setSPoint,
+                  global.setSPointLead,
+                  global.resolution),
+              TextField(
+                decoration: const InputDecoration(
+                  label: Text('t(0~1)'),
+                  border: OutlineInputBorder(),
+                ),
+                controller: global.tTController,
+                onSubmitted: (value) {
+                  if (value.isNotEmpty) {
+                    double v = value.toDouble();
+                    if (v > 1) {
+                      v = 1;
+                    }
+                    global.slideValue = v;
+                  }
+                },
+                inputFormatters: [
+                  XNumberTextInputFormatter(isAllowNegative: false)
+                ],
+              ),
+              Slider(
+                value: global.slideValue,
+                onChanged: (v) => global.slideValue = v,
+                max: 1.0,
+              ),
+              Row(
                 children: [
-                  FilledButton(
+                  ElevatedButton(
                     onPressed: () {
-                      global.addSPoint();
+                      double speed = global.sController.text.toDouble();
+                      speed = speed / global.resolution;
+                      int lead = global.lController.text.toInt();
+                      global.setSPoint(speed);
+                      global.setSPointLead(lead);
+                      global.selectedSIndex = -1;
                     },
-                    child: Text('第${global.selectedIndex + 1}个路径点添加速度点'),
+                    child: const Text('确认'),
                   ),
                   const SizedBox(width: 20),
-                  FilledButton(
+                  ElevatedButton(
                     onPressed: () {
-                      global.canvasOffset = Offset.zero;
+                      if (global.selectedSIndex == -1) {
+                        return;
+                      }
+                      global.deleteSPoints(global.selectedSIndex);
                     },
-                    child: const Text('图片归位'),
+                    child: const Text('删除'),
+                  ),
+                  const SizedBox(width: 20),
+                  TextButton(
+                    onPressed: () {
+                      int tmp = global.selectedSIndex - 1;
+                      if (tmp < 0) {
+                        tmp = global.sPoints.length - 1;
+                      }
+                      global.selectedSIndex = tmp;
+                    },
+                    child: const Text('上一个'),
+                  ),
+                  const SizedBox(width: 10),
+                  TextButton(
+                    onPressed: () {
+                      int tmp = global.selectedSIndex + 1;
+                      if (tmp > global.sPoints.length - 1) {
+                        tmp = -1;
+                      }
+                      global.selectedSIndex = tmp;
+                    },
+                    child: const Text('下一个'),
                   ),
                 ],
               ),
-            ),
-            ...inputWidget(
-                global.xSController,
-                global.ySController,
-                global.tSController,
-                global.sController,
-                global.lController,
-                global.setSPoint,
-                global.setSPointLead,
-                global.resolution),
-            TextBox(
-              header: 't',
-              placeholder: '0~1',
-              controller: global.tTController,
-              onSubmitted: (value) {
-                if (value.isNotEmpty) {
-                  double v = value.toDouble();
-                  if (v > 1) {
-                    v = 1;
-                  }
-                  global.slideValue = v;
-                }
-              },
-              inputFormatters: [
-                XNumberTextInputFormatter(isAllowNegative: false)
-              ],
-            ),
-            Slider(
-              value: global.slideValue,
-              onChanged: (v) => global.slideValue = v,
-              max: 1.0,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                FilledButton(
-                  onPressed: () {
-                    double speed = global.sController.text.toDouble();
-                    speed = speed / global.resolution;
-                    int lead = global.lController.text.toInt();
-                    global.setSPoint(speed);
-                    global.setSPointLead(lead);
-                    global.selectedSIndex = -1;
-                  },
-                  child: const Text('确认'),
-                ),
-                const SizedBox(width: 20),
-                FilledButton(
-                  style: ButtonStyle(
-                      backgroundColor: ButtonState.all(
-                          global.selectedSIndex != -1
-                              ? Colors.red
-                              : Colors.grey)),
-                  onPressed: () {
-                    if (global.selectedSIndex == -1) {
-                      return;
-                    }
-                    global.deleteSPoints(global.selectedSIndex);
-                  },
-                  child: const Text('删除'),
-                ),
-                const SizedBox(width: 20),
-                Button(
-                  onPressed: () {
-                    global.selectedSIndex -= 1;
-                    if (global.selectedSIndex < 0) {
-                      global.selectedSIndex = global.sPoints.length - 1;
-                    }
-                    global.updateSController();
-                  },
-                  child: const Text('上一个'),
-                ),
-                const SizedBox(width: 10),
-                Button(
-                  onPressed: () {
-                    global.selectedSIndex += 1;
-                    if (global.selectedSIndex > global.sPoints.length - 1) {
-                      global.selectedSIndex = -1;
-                    }
-                    global.updateSController();
-                  },
-                  child: const Text('下一个'),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

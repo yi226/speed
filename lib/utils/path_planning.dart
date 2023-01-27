@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'dart:ui' as ui;
 
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:speed/utils/platform/platform.dart';
 import 'package:speed/utils/point.dart';

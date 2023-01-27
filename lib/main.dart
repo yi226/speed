@@ -1,4 +1,4 @@
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/utils/platform/platform.dart';
@@ -39,9 +39,10 @@ class MyApp extends StatelessWidget {
       create: (_) => Global(),
       builder: (context, child) {
         final mode = context.select<Global, ThemeMode>((value) => value.mode);
-        return FluentApp(
+        return MaterialApp(
           debugShowCheckedModeBanner: false,
-          darkTheme: ThemeData.dark(),
+          theme: ThemeData(useMaterial3: true),
+          darkTheme: ThemeData.dark(useMaterial3: true),
           themeMode: mode,
           title: 'Path Planner',
           initialRoute: '/',
@@ -59,85 +60,32 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final global = context.watch<Global>();
     global.context = context;
-    return NavigationView(
-      appBar: const NavigationAppBar(
-        leading: Icon(FluentIcons.a_a_d_logo),
-        actions: CommandsBar(),
-      ),
-      pane: NavigationPane(
-        selected: 0,
-        displayMode: PaneDisplayMode.compact,
-        menuButton: Container(),
-        items: [
-          PaneItem(
-              icon: const Icon(FluentIcons.app_icon_default_edit),
-              title: const Text('Speed Plan'),
-              body: Row(
-                children: global.cType == CType.path
-                    ? [
-                        const CurveWidget(),
-                        const Expanded(child: ControlWidget())
-                      ]
-                    : [
-                        const SCurveWidget(),
-                        const Expanded(child: SControlWidget())
-                      ],
-              )),
-        ],
-        footerItems: [
-          PaneItemSeparator(),
-          PaneItem(
-            icon: const Icon(FluentIcons.info),
-            title: const Text('Info'),
-            body: Container(),
-            onTap: () async {
-              Info info = Info(appDocDirPath: global.appDocDirPath);
-              bool? result = await info.showInfo(context);
-              while (result == true) {
-                await Future.delayed(const Duration(seconds: 1));
-                info = Info(appDocDirPath: global.appDocDirPath);
-                // ignore: use_build_context_synchronously
-                result = await info.showInfo(context);
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class CommandsBar extends StatelessWidget {
-  const CommandsBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final global = context.watch<Global>();
-    return CommandBarCard(
-      margin: const EdgeInsets.only(left: 50),
-      child: CommandBar(
-        primaryItems: [
-          CommandBarButton(
-              label: const Text("导出(O)"), onPressed: () => global.exportPath()),
-          CommandBarButton(
-              label: const Text("导入(I)"), onPressed: () => global.importPath()),
-          CommandBarButton(
-              label: const Text("设置(S)"),
+    return Scaffold(
+      appBar: AppBar(
+        leading: const Icon(Icons.local_florist),
+        actions: [
+          const SizedBox(width: 50),
+          TextButton(
+              child: const Text("导出(O)"), onPressed: () => global.exportPath()),
+          TextButton(
+              child: const Text("导入(I)"), onPressed: () => global.importPath()),
+          TextButton(
+              child: const Text("设置(S)"),
               onPressed: () async {
                 await showDialog(
                   context: context,
-                  builder: (context) => ContentDialog(
+                  builder: (context) => AlertDialog(
                     title: const Text('设置'),
                     content: const SettingWidget(),
                     actions: [
-                      Button(
+                      TextButton(
                         child: const Text('保存配置'),
                         onPressed: () async {
                           await global.save('Settings', global.saveString);
                           global.settingSave = true;
                         },
                       ),
-                      FilledButton(
+                      ElevatedButton(
                         child: const Text('OK'),
                         onPressed: () {
                           global.settingSave = false;
@@ -148,42 +96,70 @@ class CommandsBar extends StatelessWidget {
                   ),
                 );
               }),
-          CommandBarButton(
-              label: const Text("补全(A)"),
+          TextButton(
+              child: const Text("补全(A)"),
               onPressed: () => global.completeSPoint()),
-          CommandBarButton(
-              label: const Text("生成(C)"), onPressed: () => global.createPath()),
-          CommandBarButton(
-              label: const Text("报告(R)"),
+          TextButton(
+              child: const Text("生成(C)"), onPressed: () => global.createPath()),
+          TextButton(
+              child: const Text("报告(R)"),
               onPressed: () => global.showSpeedCurve()),
-          CommandBarButton(
-              label: const Text("模拟(E)"),
+          TextButton(
+              child: const Text("模拟(E)"),
               onPressed: () => global.showEmulate()),
-          const CommandBarSeparator(),
-          CommandBarButton(
-              label: ComboBox(
-                value: global.cType.name,
-                items: CType.values
-                    .map((e) => ComboBoxItem(
-                          value: e.name,
-                          child: Text(e.name),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  if (global.image == null) {
-                    global.showError('请先选择地图');
-                    return;
-                  }
-                  if (!global.checkControl()) {
-                    global.showError('控制点长度不能为0');
-                    return;
-                  }
-                  if (value != null) {
-                    global.cType = CType.parse(value);
-                  }
-                },
-              ),
-              onPressed: () {}),
+          const Spacer(),
+          DropdownButton(
+            value: global.cType.name,
+            items: CType.values
+                .map((e) => DropdownMenuItem(
+                      value: e.name,
+                      child: Text(e.name),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              if (global.image == null) {
+                global.showError('请先选择地图');
+                return;
+              }
+              if (!global.checkControl()) {
+                global.showError('控制点长度不能为0');
+                return;
+              }
+              if (value != null) {
+                global.cType = CType.parse(value);
+              }
+            },
+          ),
+        ],
+      ),
+      body: Row(
+        children: [
+          Drawer(
+            elevation: 0,
+            width: 50,
+            child: Column(
+              children: [
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.info),
+                  onPressed: () async {
+                    Info info = Info(appDocDirPath: global.appDocDirPath);
+                    bool? result = await info.showInfo(context);
+                    while (result == true) {
+                      await Future.delayed(const Duration(seconds: 1));
+                      info = Info(appDocDirPath: global.appDocDirPath);
+                      // ignore: use_build_context_synchronously
+                      result = await info.showInfo(context);
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+          ...global.cType == CType.path
+              ? [const CurveWidget(), const Expanded(child: ControlWidget())]
+              : [const SCurveWidget(), const Expanded(child: SControlWidget())],
         ],
       ),
     );

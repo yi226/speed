@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 import 'dart:async';
 
 import 'package:speed/utils/point.dart';
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 
 class IntegratePlatform {
   static bool get isDesktop => false;
@@ -15,7 +15,7 @@ class IntegratePlatform {
   static String get pathSeparator => '/';
 
   static Future<String> getDirectory() async {
-    return '/';
+    return '.';
   }
 
   static Future<List> writeToHFile(
@@ -23,7 +23,7 @@ class IntegratePlatform {
     // export to .h file
     String fileName = "Path.h";
     WebFile.outFile(notes: notes, fileName: fileName);
-    return [false, fileName];
+    return [true, fileName];
   }
 }
 
@@ -124,19 +124,22 @@ class Info {
   Future<bool?> showInfo(BuildContext context) async {
     return await showDialog(
       context: context,
-      builder: (context) => ContentDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Info'),
-        content: Column(
-          children: [
-            Expanded(child: Text(info)),
-            const SizedBox(height: 10),
-            Text('Version: $version'),
-            const SizedBox(height: 10),
-            const Text('开发者: 易鹏飞, 李思宇'),
-          ],
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            children: [
+              SelectableText(info),
+              const Spacer(),
+              Text('Version: $version'),
+              const SizedBox(height: 10),
+              const Text('开发者: 易鹏飞, 李思宇'),
+            ],
+          ),
         ),
         actions: [
-          FilledButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
           ),

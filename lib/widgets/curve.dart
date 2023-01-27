@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/global.dart';
 import 'package:speed/utils/path_planning.dart';
@@ -443,12 +443,10 @@ class _ECurveWidgetState extends State<ECurveWidget>
         );
       },
       child: Card(
-        padding: EdgeInsets.zero,
-        child: IconButton(
-            icon: const Icon(FluentIcons.update_restore, size: 20),
-            onPressed: () {
-              _controller.reset();
-              _controller.forward();
+        child: InkWell(
+            child: const Icon(Icons.arrow_circle_right_outlined, size: 20),
+            onTap: () {
+              _controller.forward(from: 0);
             }),
       ),
     );
@@ -564,9 +562,9 @@ class VerticalProgressBar extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           height: height * value,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.orange,
-            borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
         ),
       ),
