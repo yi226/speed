@@ -140,6 +140,17 @@ class MainPage extends StatelessWidget {
             child: Column(
               children: [
                 const Spacer(),
+                RotatedBox(
+                  quarterTurns: 3,
+                  child: Slider(
+                    value: global.canvasScale,
+                    onChanged: (v) => global.canvasScale = v,
+                    min: 0.5,
+                    max: 2.0,
+                  ),
+                ),
+                Text("倍数\n${global.canvasScale.toStringAsFixed(2)}"),
+                const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.info),
                   onPressed: () async {

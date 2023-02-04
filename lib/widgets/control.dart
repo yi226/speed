@@ -205,6 +205,7 @@ class ControlWidget extends StatelessWidget {
                       FilledButton(
                         onPressed: () {
                           global.canvasOffset = Offset.zero;
+                          global.canvasScale = 1;
                         },
                         child: const Text('图片归位'),
                       ),
@@ -331,6 +332,7 @@ class SControlWidget extends StatelessWidget {
                       FilledButton(
                         onPressed: () {
                           global.canvasOffset = Offset.zero;
+                          global.canvasScale = 1;
                         },
                         child: const Text('图片归位'),
                       ),

@@ -10,25 +10,36 @@ import '../utils/point.dart';
 
 class IndexFunc {
   static int getIndex(Global global, Offset offset) {
-    return global.points.indexWhere(
-        (e) => (Offset(e.x, e.y) + global.canvasOffset - offset).distance < 10);
+    return global.points.indexWhere((e) =>
+        (Offset(e.x, e.y) + (global.canvasOffset - offset) / global.canvasScale)
+            .distance <
+        10);
   }
 
   static int getControlIndex(Global global, Offset offset) {
     return global.points.indexWhere((e) =>
-        (Offset(e.x, e.y) + e.control + global.canvasOffset - offset).distance <
+        (Offset(e.x, e.y) +
+                e.control +
+                (global.canvasOffset - offset) / global.canvasScale)
+            .distance <
         6);
   }
 
   static int getControl2Index(Global global, Offset offset) {
     return global.points.indexWhere((e) =>
-        (Offset(e.x, e.y) - e.control + global.canvasOffset - offset).distance <
+        (Offset(e.x, e.y) -
+                e.control +
+                (global.canvasOffset - offset) / global.canvasScale)
+            .distance <
         6);
   }
 
   static int getSpeedIndex(Global global, Offset offset) {
     return global.sPoints.lastIndexWhere((p) =>
-        (global.fromSPoint(p) + global.canvasOffset - offset).distance < 20);
+        (global.fromSPoint(p) +
+                (global.canvasOffset - offset) / global.canvasScale)
+            .distance <
+        20);
   }
 }
 
@@ -74,7 +85,7 @@ class CurveWidget extends StatelessWidget {
                     },
                     onPanUpdate: (details) {
                       if (global.panIndex != -1) {
-                        global.updatePoints(details.delta);
+                        global.updatePoints(details.delta / global.canvasScale);
                       } else {
                         global.canvasOffset += details.delta;
                       }
@@ -101,6 +112,7 @@ class CurveWidget extends StatelessWidget {
                           global.image!,
                           global.canvasOffset,
                           global.canvasSize,
+                          global.canvasScale,
                           global.selectedIndex,
                         ),
                       ),
@@ -145,13 +157,15 @@ class _RectPainter extends CustomPainter {
   final int selectedIndex;
   final Offset canvasOffset;
   final Size canvasSize;
+  final double canvasScale;
 
   _RectPainter(this.pointList, this.image, this.canvasOffset, this.canvasSize,
-      this.selectedIndex);
+      this.canvasScale, this.selectedIndex);
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.translate(canvasOffset.dx, canvasOffset.dy);
+    canvas.scale(canvasScale);
 
     canvas.drawImageRect(
       image,
@@ -247,6 +261,7 @@ class SCurveWidget extends StatelessWidget {
                           global.image!,
                           global.canvasOffset,
                           global.canvasSize,
+                          global.canvasScale,
                           global.selectedIndex,
                           global.selectedSIndex,
                           global.resolution,
@@ -283,6 +298,7 @@ class _SRectPainter extends CustomPainter {
   final int selectedSIndex;
   final Offset canvasOffset;
   final Size canvasSize;
+  final double canvasScale;
   final List<SpeedPoint> sPointList;
   final double resolution;
   SpeedPoint? get nPoint =>
@@ -294,6 +310,7 @@ class _SRectPainter extends CustomPainter {
     this.image,
     this.canvasOffset,
     this.canvasSize,
+    this.canvasScale,
     this.selectedIndex,
     this.selectedSIndex,
     this.resolution,
@@ -318,6 +335,7 @@ class _SRectPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.translate(canvasOffset.dx, canvasOffset.dy);
+    canvas.scale(canvasScale);
 
     canvas.drawImageRect(
       image,

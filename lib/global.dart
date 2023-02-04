@@ -367,6 +367,13 @@ class Global extends ChangeNotifier {
     notifyListeners();
   }
 
+  double _canvasScale = 1;
+  double get canvasScale => _canvasScale;
+  set canvasScale(double offset) {
+    _canvasScale = offset;
+    notifyListeners();
+  }
+
   ChartType _chartType = ChartType.v;
   ChartType get chartType => _chartType;
   set chartType(ChartType type) {
