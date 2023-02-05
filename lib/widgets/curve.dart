@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:speed/global.dart';
 import 'package:speed/utils/path_planning.dart';
+import 'package:speed/utils/scroll_detector.dart';
 import 'dart:ui' as ui;
 
 import '../utils/point.dart';
@@ -104,16 +105,28 @@ class CurveWidget extends StatelessWidget {
                         global.selectedIndex = index;
                       }
                     },
-                    child: ClipRect(
-                      child: CustomPaint(
-                        size: global.canvasSize,
-                        painter: _RectPainter(
-                          global.points,
-                          global.image!,
-                          global.canvasOffset,
-                          global.canvasSize,
-                          global.canvasScale,
-                          global.selectedIndex,
+                    child: ScrollDetector(
+                      onPointerScroll: (event) {
+                        double tmp = global.canvasScale;
+                        tmp -= event.scrollDelta.dy * 0.0005;
+                        if (tmp > 2) {
+                          tmp = 2;
+                        } else if (tmp < 0.5) {
+                          tmp = 0.5;
+                        }
+                        global.canvasScale = tmp;
+                      },
+                      child: ClipRect(
+                        child: CustomPaint(
+                          size: global.canvasSize,
+                          painter: _RectPainter(
+                            global.points,
+                            global.image!,
+                            global.canvasOffset,
+                            global.canvasSize,
+                            global.canvasScale,
+                            global.selectedIndex,
+                          ),
                         ),
                       ),
                     ),
