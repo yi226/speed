@@ -265,20 +265,32 @@ class SCurveWidget extends StatelessWidget {
                       global.selectedSIndex = index;
                     }
                   },
-                  child: ClipRect(
-                    child: CustomPaint(
-                        size: global.canvasSize,
-                        painter: _SRectPainter(
-                          global.points,
-                          global.sPoints,
-                          global.image!,
-                          global.canvasOffset,
-                          global.canvasSize,
-                          global.canvasScale,
-                          global.selectedIndex,
-                          global.selectedSIndex,
-                          global.resolution,
-                        )),
+                  child: ScrollDetector(
+                    onPointerScroll: (event) {
+                      double tmp = global.canvasScale;
+                      tmp -= event.scrollDelta.dy * 0.0005;
+                      if (tmp > 2) {
+                        tmp = 2;
+                      } else if (tmp < 0.5) {
+                        tmp = 0.5;
+                      }
+                      global.canvasScale = tmp;
+                    },
+                    child: ClipRect(
+                      child: CustomPaint(
+                          size: global.canvasSize,
+                          painter: _SRectPainter(
+                            global.points,
+                            global.sPoints,
+                            global.image!,
+                            global.canvasOffset,
+                            global.canvasSize,
+                            global.canvasScale,
+                            global.selectedIndex,
+                            global.selectedSIndex,
+                            global.resolution,
+                          )),
+                    ),
                   ),
                 );
               }),

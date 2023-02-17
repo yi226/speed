@@ -15,8 +15,8 @@ import 'package:speed/widgets/curve.dart';
 
 // 规划模式
 enum CType {
-  path('path'),
-  speed('speed');
+  path('路径规划'),
+  speed('速度规划');
 
   final String name;
   const CType(this.name);

@@ -38,7 +38,7 @@ dependencies:
   provider: ^6.0.5
   file_picker: ^5.2.5
   shared_preferences: ^2.0.17
-  window_manager: ^0.3.0
+  bitsdojo_window: ^0.1.5
   path_provider: ^2.0.12
   fl_chart: ^0.60.0
   dio: ^5.0.0
@@ -81,10 +81,14 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+  fonts:
+    - family: MiSans
+      fonts:
+        - asset: fonts/MiSans-Regular.ttf
   # fonts:
-  #   - family: Schyler
+  #   - family: CascadiaCode
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/CascadiaCode.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

@@ -256,7 +256,7 @@ class Info {
           future: getInfo(),
           builder: ((context, snapshot) {
             return SizedBox(
-              width: 400,
+              width: 300,
               child: Column(
                 children: [
                   Expanded(

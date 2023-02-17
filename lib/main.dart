@@ -1,3 +1,4 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -5,29 +6,28 @@ import 'package:speed/utils/platform/platform.dart';
 import 'package:speed/widgets/control.dart';
 import 'package:speed/widgets/curve.dart';
 import 'package:speed/widgets/setting.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'global.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (IntegratePlatform.isDesktop) {
-    await windowManager.ensureInitialized();
-
-    WindowOptions windowOptions = const WindowOptions(
-      minimumSize: Size(1000, 650),
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  } else {
+  if (IntegratePlatform.isMobile) {
     // 设置横屏
     await SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
   }
 
   runApp(const MyApp());
+
+  if (IntegratePlatform.isDesktop) {
+    doWhenWindowReady(() {
+      const initialSize = Size(1000, 600);
+      appWindow.minSize = initialSize;
+      appWindow.size = initialSize;
+      appWindow.alignment = Alignment.center;
+      appWindow.show();
+    });
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -41,10 +41,18 @@ class MyApp extends StatelessWidget {
         final mode = context.select<Global, ThemeMode>((value) => value.mode);
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-          darkTheme: ThemeData.dark(useMaterial3: true),
+          theme: ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: Colors.blue,
+            fontFamily: "MiSans",
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            useMaterial3: true,
+            fontFamily: "MiSans",
+          ),
           themeMode: mode,
-          title: 'Path Planner',
+          title: 'speed',
           initialRoute: '/',
           routes: {'/': (context) => const MainPage()},
         );
@@ -61,10 +69,17 @@ class MainPage extends StatelessWidget {
     final global = context.watch<Global>();
     global.context = context;
     return Scaffold(
-      appBar: AppBar(
-        leading: const Icon(Icons.local_florist),
-        actions: [
-          const SizedBox(width: 50),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(46.0),
+        child: Row(children: [
+          WindowTitleBarBox(
+            child: MoveWindow(
+              child: const Padding(
+                padding: EdgeInsets.only(left: 9, right: 9),
+                child: FlutterLogo(),
+              ),
+            ),
+          ),
           TextButton(
               child: const Text("导出(O)"), onPressed: () => global.exportPath()),
           TextButton(
@@ -107,30 +122,48 @@ class MainPage extends StatelessWidget {
           TextButton(
               child: const Text("模拟(E)"),
               onPressed: () => global.showEmulate()),
-          const Spacer(),
-          DropdownButton(
-            value: global.cType.name,
-            items: CType.values
-                .map((e) => DropdownMenuItem(
-                      value: e.name,
-                      child: Text(e.name),
-                    ))
-                .toList(),
-            onChanged: (value) {
-              if (global.image == null) {
-                global.showError('请先选择地图');
-                return;
-              }
-              if (!global.checkControl()) {
-                global.showError('控制点长度不能为0');
-                return;
-              }
-              if (value != null) {
-                global.cType = CType.parse(value);
-              }
-            },
+          const SizedBox(width: 20),
+          DropdownButtonHideUnderline(
+            child: DropdownButton(
+              focusColor: Theme.of(context).colorScheme.surface,
+              isDense: true,
+              value: global.cType.name,
+              items: CType.values
+                  .map((e) => DropdownMenuItem(
+                        value: e.name,
+                        child: Text(e.name),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                if (global.image == null) {
+                  global.showError('请先选择地图');
+                  return;
+                }
+                if (!global.checkControl()) {
+                  global.showError('控制点长度不能为0');
+                  return;
+                }
+                if (value != null) {
+                  global.cType = CType.parse(value);
+                }
+              },
+            ),
           ),
-        ],
+          Expanded(
+            child: Column(
+              children: [
+                WindowTitleBarBox(
+                  child: Row(
+                    children: [
+                      Expanded(child: MoveWindow()),
+                      const WindowButtons(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+        ]),
       ),
       body: Row(
         children: [
@@ -143,6 +176,8 @@ class MainPage extends StatelessWidget {
                 RotatedBox(
                   quarterTurns: 3,
                   child: Slider(
+                    overlayColor: const MaterialStatePropertyAll(
+                        Color.fromARGB(0, 0, 0, 0)),
                     value: global.canvasScale,
                     onChanged: (v) => global.canvasScale = v,
                     min: 0.5,
@@ -150,9 +185,20 @@ class MainPage extends StatelessWidget {
                   ),
                 ),
                 Text("倍数\n${global.canvasScale.toStringAsFixed(2)}"),
+                InkWell(
+                    onTap: () => global.canvasScale = 1,
+                    child: const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(Icons.crop_free, size: 20),
+                      ),
+                    )),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.info),
+                  icon: Icon(
+                    Icons.info,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   onPressed: () async {
                     Info info = Info(appDocDirPath: global.appDocDirPath);
                     bool? result = await info.showInfo(context);
@@ -173,6 +219,34 @@ class MainPage extends StatelessWidget {
               : [const SCurveWidget(), const Expanded(child: SControlWidget())],
         ],
       ),
+    );
+  }
+}
+
+class WindowButtons extends StatelessWidget {
+  const WindowButtons({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final buttonColors = WindowButtonColors(
+        iconNormal: Theme.of(context).iconTheme.color,
+        mouseOver: Colors.grey.shade300,
+        mouseDown: Colors.grey.shade400,
+        iconMouseOver: Colors.black,
+        iconMouseDown: Colors.black);
+
+    final closeButtonColors = WindowButtonColors(
+      mouseOver: const Color(0xFFD32F2F),
+      mouseDown: const Color(0xFFB71C1C),
+      iconNormal: Theme.of(context).iconTheme.color,
+      iconMouseOver: Colors.white,
+    );
+    return Row(
+      children: [
+        MinimizeWindowButton(colors: buttonColors),
+        MaximizeWindowButton(colors: buttonColors),
+        CloseWindowButton(colors: closeButtonColors),
+      ],
     );
   }
 }

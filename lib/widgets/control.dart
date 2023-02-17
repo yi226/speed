@@ -369,6 +369,8 @@ class SControlWidget extends StatelessWidget {
                 ],
               ),
               Slider(
+                overlayColor:
+                    const MaterialStatePropertyAll(Color.fromARGB(0, 0, 0, 0)),
                 value: global.slideValue,
                 onChanged: (v) => global.slideValue = v,
                 max: 1.0,
