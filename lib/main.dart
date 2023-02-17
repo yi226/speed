@@ -14,6 +14,9 @@ void main() async {
     // 设置横屏
     await SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+    // 全面屏
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: []);
   }
 
   runApp(const MyApp());
