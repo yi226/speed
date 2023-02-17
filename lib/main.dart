@@ -43,12 +43,12 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             colorSchemeSeed: Colors.blue,
-            fontFamily: "MiSans",
+            fontFamily: IntegratePlatform.isDesktop ? "MiSans" : null,
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             useMaterial3: true,
-            fontFamily: "MiSans",
+            fontFamily: IntegratePlatform.isDesktop ? "MiSans" : null,
           ),
           themeMode: mode,
           title: 'speed',
