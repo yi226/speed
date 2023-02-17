@@ -12,6 +12,7 @@ import 'dart:ui' as ui;
 
 import 'package:speed/widgets/chart.dart';
 import 'package:speed/widgets/curve.dart';
+import 'package:speed/widgets/setting.dart';
 
 // 规划模式
 enum CType {
@@ -662,6 +663,32 @@ class Global extends ChangeNotifier {
                 posTransTo: posTransTo),
           );
         });
+  }
+
+  showSetting() async {
+    await showDialog(
+      context: context!,
+      builder: (context) => AlertDialog(
+        title: const Text('设置'),
+        content: const SettingWidget(),
+        actions: [
+          TextButton(
+            child: const Text('保存配置'),
+            onPressed: () async {
+              await save('Settings', saveString);
+              settingSave = true;
+            },
+          ),
+          ElevatedButton(
+            child: const Text('OK'),
+            onPressed: () {
+              settingSave = false;
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   showError(String e) {

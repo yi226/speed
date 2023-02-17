@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:speed/utils/platform/platform.dart';
 import 'package:speed/widgets/control.dart';
 import 'package:speed/widgets/curve.dart';
-import 'package:speed/widgets/setting.dart';
 
 import 'global.dart';
 
@@ -86,31 +85,7 @@ class MainPage extends StatelessWidget {
               child: const Text("导入(I)"), onPressed: () => global.importPath()),
           TextButton(
               child: const Text("设置(S)"),
-              onPressed: () async {
-                await showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('设置'),
-                    content: const SettingWidget(),
-                    actions: [
-                      TextButton(
-                        child: const Text('保存配置'),
-                        onPressed: () async {
-                          await global.save('Settings', global.saveString);
-                          global.settingSave = true;
-                        },
-                      ),
-                      ElevatedButton(
-                        child: const Text('OK'),
-                        onPressed: () {
-                          global.settingSave = false;
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              }),
+              onPressed: () => global.showSetting()),
           TextButton(
               child: const Text("补全(A)"),
               onPressed: () => global.completeSPoint()),
