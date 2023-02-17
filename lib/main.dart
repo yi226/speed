@@ -71,14 +71,19 @@ class MainPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(46.0),
         child: Row(children: [
-          WindowTitleBarBox(
-            child: MoveWindow(
-              child: const Padding(
-                padding: EdgeInsets.only(left: 9, right: 9),
-                child: FlutterLogo(),
-              ),
-            ),
-          ),
+          IntegratePlatform.isDesktop
+              ? WindowTitleBarBox(
+                  child: MoveWindow(
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 9, right: 9),
+                      child: FlutterLogo(),
+                    ),
+                  ),
+                )
+              : const Padding(
+                  padding: EdgeInsets.only(left: 9, right: 9),
+                  child: FlutterLogo(),
+                ),
           TextButton(
               child: const Text("导出(O)"), onPressed: () => global.exportPath()),
           TextButton(
@@ -127,14 +132,15 @@ class MainPage extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                WindowTitleBarBox(
-                  child: Row(
-                    children: [
-                      Expanded(child: MoveWindow()),
-                      const WindowButtons(),
-                    ],
+                if (IntegratePlatform.isDesktop)
+                  WindowTitleBarBox(
+                    child: Row(
+                      children: [
+                        Expanded(child: MoveWindow()),
+                        const WindowButtons(),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           )

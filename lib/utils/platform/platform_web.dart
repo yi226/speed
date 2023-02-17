@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:speed/utils/point.dart';
 import 'package:flutter/material.dart';
@@ -175,28 +176,50 @@ class PathFile {
 }
 
 class Info {
-  String info = 'https://github.com/yi226/speed';
+  String info = '加载中';
   int version = 1;
   String appDocDirPath;
+  Dio dio = Dio();
 
   Info({required this.appDocDirPath});
+
+  Future<String> getInfo() async {
+    try {
+      final response = await dio.get('doc/info.json');
+      version = response.data["version"];
+      return response.data["info"];
+    } catch (e) {
+      return e.toString();
+    }
+  }
 
   Future<bool?> showInfo(BuildContext context) async {
     return await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Info'),
-        content: SizedBox(
-          width: 400,
-          child: Column(
-            children: [
-              SelectableText(info),
-              const Spacer(),
-              Text('Version: $version'),
-              const SizedBox(height: 10),
-              const Text('开发者: 易鹏飞, 李思宇'),
-            ],
-          ),
+        content: FutureBuilder(
+          future: getInfo(),
+          builder: (context, snapshot) {
+            return SizedBox(
+              width: 300,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        SelectableText(snapshot.data ?? info),
+                        if (!snapshot.hasData) const LinearProgressIndicator(),
+                      ],
+                    ),
+                  ),
+                  Text('Version: $version'),
+                  const SizedBox(height: 10),
+                  const Text('开发者: 易鹏飞, 李思宇'),
+                ],
+              ),
+            );
+          },
         ),
         actions: [
           ElevatedButton(
