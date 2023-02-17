@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         final mode = context.select<Global, ThemeMode>((value) => value.mode);
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(useMaterial3: true),
+          theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
           darkTheme: ThemeData.dark(useMaterial3: true),
           themeMode: mode,
           title: 'Path Planner',

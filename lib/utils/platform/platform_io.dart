@@ -249,6 +249,7 @@ class Info {
   Future<bool?> showInfo(BuildContext context) async {
     return await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Info'),
         content: FutureBuilder(
@@ -259,7 +260,13 @@ class Info {
               child: Column(
                 children: [
                   Expanded(
-                      child: ListView(children: [Text(snapshot.data ?? info)])),
+                    child: ListView(
+                      children: [
+                        Text(snapshot.data ?? info),
+                        if (!snapshot.hasData) const LinearProgressIndicator(),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Text('Version: $version'),
                   const SizedBox(height: 10),

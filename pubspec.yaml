@@ -40,8 +40,8 @@ dependencies:
   shared_preferences: ^2.0.17
   window_manager: ^0.3.0
   path_provider: ^2.0.12
-  fl_chart: ^0.55.2
-  dio: ^4.0.6
+  fl_chart: ^0.60.0
+  dio: ^5.0.0
 
 dev_dependencies:
   flutter_test:
