@@ -175,6 +175,8 @@ class Global extends ChangeNotifier {
   final TextEditingController tTController = TextEditingController();
   final TextEditingController lController = TextEditingController();
 
+  final TextEditingController fileController = TextEditingController();
+
   // 差速轮驱动轮轮距
   final robotWidthController = TextEditingController(text: '60');
   double get robotWidth => double.tryParse(robotWidthController.text) ?? 60;
@@ -576,8 +578,40 @@ class Global extends ChangeNotifier {
         dialogTitle: 'Please select an output file:',
         fileName: 'path.json',
       );
+    } else if (IntegratePlatform.isMobile) {
+      final result = await showDialog<bool>(
+        context: context!,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: TextField(
+            controller: fileController,
+            decoration: const InputDecoration(
+                label: Text("文件名"), border: OutlineInputBorder()),
+          ),
+          actions: [
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+            ),
+            ElevatedButton(
+              child: const Text('OK'),
+              onPressed: () {
+                if (fileController.text.isEmpty) {
+                  fileController.text = "path";
+                }
+                Navigator.pop(context, true);
+              },
+            ),
+          ],
+        ),
+      );
+      outputFile = result ?? false
+          ? '$pathFilePath${IntegratePlatform.pathSeparator}${fileController.text}.json'
+          : null;
     } else {
-      outputFile = '$appDocDirPath${IntegratePlatform.pathSeparator}path.json';
+      outputFile = '.';
     }
 
     if (outputFile != null) {
@@ -731,6 +765,7 @@ class Global extends ChangeNotifier {
     tTController.dispose();
     lController.dispose();
     robotWidthController.dispose();
+    fileController.dispose();
     image?.dispose();
     super.dispose();
   }
