@@ -26,10 +26,6 @@ class CAPPoint {
     this.leadlag = 0,
   });
 
-  bool equal(CAPPoint p) {
-    return vec == p.vec;
-  }
-
   double parse(String name) {
     switch (name) {
       case '速度':
@@ -86,6 +82,22 @@ class PathPlanFunc {
     }
   }
 
+  Offset posTransFrom({double? x, double? y, Offset? p}) {
+    Offset r = Offset.zero;
+    Offset o = Offset(canvasSize.width * 0.5, canvasSize.height);
+    if (x != null) {
+      r = r.translate(x - o.dx, 0);
+    }
+    if (y != null) {
+      r = r.translate(0, o.dy - y);
+    }
+    if (p != null) {
+      r = r.translate(p.dx - o.dx, o.dy - p.dy);
+    }
+    r = r * resolution;
+    return r;
+  }
+
   bool equalTo(PathPlanFunc func) {
     if (_points.length != func.points.length) return false;
     if (_sPoints.length != func.sPoints.length) return false;
@@ -101,6 +113,8 @@ class PathPlanFunc {
     return true;
   }
 
+  /// * 辅助函数
+  /// 由速度点号和距离速度点的路程获取规划曲线上的点
   ui.Tangent _getPointFromS(int i, double s) {
     int a = _sPoints[i].pointIndex;
     int b = _sPoints[i + 1].pointIndex;
@@ -120,6 +134,7 @@ class PathPlanFunc {
     return p.getTangentForOffset(_getBezierS(a) * _sPoints[i].t + s)!;
   }
 
+  /// 获取第i路径点到第i+1路径点间贝塞尔曲线路径
   double _getBezierS(int i) {
     var path = ui.Path();
     path.moveTo(_points[i].x, _points[i].y);
@@ -135,6 +150,7 @@ class PathPlanFunc {
     return p.length;
   }
 
+  /// 获取第a个速度点到第b个速度点间距离
   double _getS(int a, int b) {
     double s = 0;
     int i = _sPoints[a].pointIndex;
@@ -151,6 +167,7 @@ class PathPlanFunc {
     return s;
   }
 
+  /// 速度规划主函数
   Future<void> speedPlan() async {
     double dt = 0.01 / 20;
     double S, v1, v2, v, tFac;
@@ -239,6 +256,7 @@ class PathPlanFunc {
     }
   }
 
+  /// 位姿规划
   double poseCaculate(double sita1, double sita2, double w1, double w2,
       double T, double t, bool selectSW) {
     double A, B, C, E, F;
@@ -261,22 +279,7 @@ class PathPlanFunc {
     return selectSW ? sita : w;
   }
 
-  Offset posTransFrom({double? x, double? y, Offset? p}) {
-    Offset r = Offset.zero;
-    Offset o = Offset(canvasSize.width * 0.5, canvasSize.height);
-    if (x != null) {
-      r = r.translate(x - o.dx, 0);
-    }
-    if (y != null) {
-      r = r.translate(0, o.dy - y);
-    }
-    if (p != null) {
-      r = r.translate(p.dx - o.dx, o.dy - p.dy);
-    }
-    r = r * resolution;
-    return r;
-  }
-
+  /// 导出规划结果
   Future<bool> outSpeedPlan() async {
     String notes =
         '/* ref_x,    ref_y,    ref_theta,   ref_pose,    ref_delta,    ref_v,    ref_preivew*/\n';
