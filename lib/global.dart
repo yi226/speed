@@ -31,7 +31,22 @@ enum CType {
 }
 
 class Global extends ChangeNotifier {
-  Global() {
+  /// 单例模式
+  factory Global() => _getInstance();
+
+  factory Global.init() => _getInstance();
+
+  static Global? _instance;
+
+  static Global get instance => _getInstance();
+
+  static Global _getInstance() {
+    _instance ??= Global._internal();
+    return _instance!;
+  }
+
+  /// 初始化
+  Global._internal() {
     addPoints(Point(x: 100, y: 100));
     addPoints(Point(x: 200, y: 200));
     initPath();

@@ -10,6 +10,7 @@ import 'global.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Global.init();
   if (IntegratePlatform.isMobile) {
     // 设置横屏
     await SystemChrome.setPreferredOrientations(
@@ -18,7 +19,6 @@ void main() async {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: []);
   }
-
   runApp(const MyApp());
 
   if (IntegratePlatform.isDesktop) {
