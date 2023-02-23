@@ -473,48 +473,54 @@ class _ECurveWidgetState extends State<ECurveWidget>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(width: 2, color: Colors.black),
+    return SizedBox(
+      width: 550,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Row(
+            children: [
+              Container(
+                width: 500,
+                decoration: BoxDecoration(
+                  border: Border.all(width: 2, color: Colors.black),
+                ),
+                child: ClipRect(
+                    child: CustomPaint(
+                        size: widget.canvasSize,
+                        painter: _ERectPainter(
+                            widget.pointList,
+                            widget.image,
+                            widget.canvasSize,
+                            widget.rPointList[getIndex(_controller.value)],
+                            widget.posTransTo))),
               ),
-              child: ClipRect(
-                  child: CustomPaint(
-                      size: widget.canvasSize,
-                      painter: _ERectPainter(
-                          widget.pointList,
-                          widget.image,
-                          widget.canvasSize,
-                          widget.rPointList[getIndex(_controller.value)],
-                          widget.posTransTo))),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('时间:'),
-                Text(
-                    '${widget.rPointList[getIndex(_controller.value)].t.toStringAsFixed(2)}s'),
-                const SizedBox(height: 10),
-                VerticalProgressBar(
-                    width: 20, height: 400, value: _controller.value),
-                const SizedBox(height: 20),
-                child!,
-              ],
-            )
-          ],
-        );
-      },
-      child: Card(
-        child: InkWell(
-            child: const Icon(Icons.arrow_circle_right_outlined, size: 20),
-            onTap: () {
-              _controller.forward(from: 0);
-            }),
+              SizedBox(
+                width: 50,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('时间:'),
+                    Text(
+                        '${widget.rPointList[getIndex(_controller.value)].t.toStringAsFixed(2)}s'),
+                    const SizedBox(height: 10),
+                    VerticalProgressBar(
+                        width: 20, height: 400, value: _controller.value),
+                    const SizedBox(height: 20),
+                    child!,
+                  ],
+                ),
+              )
+            ],
+          );
+        },
+        child: Card(
+          child: InkWell(
+              child: const Icon(Icons.arrow_circle_right_outlined, size: 20),
+              onTap: () {
+                _controller.forward(from: 0);
+              }),
+        ),
       ),
     );
   }
