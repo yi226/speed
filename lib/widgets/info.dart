@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:speed/utils/platform/platform.dart';
 
 class Info {
   String info = '''使用前请先点击设置 
@@ -23,7 +24,7 @@ class Info {
 2.右键点击选择速度点
   *添加速度点请先左键点击选中对应路径点
   *默认生成文件目录: .\\path\\''';
-  String version = "2.0.0";
+  String version = Version.instance.now;
 
   Future<void> showInfo(BuildContext context) async {
     return await showDialog(
@@ -48,6 +49,20 @@ class Info {
           ),
         ),
         actions: [
+          Container(
+            constraints: BoxConstraints.tight(const Size(160, 50)),
+            child: Version.instance.update
+                ? ListTile(
+                    title: Text("新版本: ${Version.instance.newer}"),
+                    trailing: const Icon(
+                      Icons.new_releases,
+                      color: Colors.redAccent,
+                    ),
+                    onTap: () => Version.instance.showUpdate(context),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 80),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),

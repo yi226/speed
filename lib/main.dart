@@ -179,6 +179,26 @@ class MainPage extends StatelessWidget {
                       ),
                     )),
                 const Spacer(),
+                FutureBuilder(
+                  future: Version.instance.shouldUpdate(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Container(
+                          constraints: BoxConstraints.tight(const Size(20, 20)),
+                          child: const CircularProgressIndicator());
+                    }
+                    return snapshot.data == true
+                        ? IconButton(
+                            icon: const Icon(
+                              Icons.new_releases,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () =>
+                                Version.instance.showUpdate(context),
+                          )
+                        : const SizedBox(height: 20);
+                  },
+                ),
                 IconButton(
                   icon: Icon(
                     Icons.info,

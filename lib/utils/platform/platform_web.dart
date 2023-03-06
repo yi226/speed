@@ -173,3 +173,7 @@ class PathFile {
     return r;
   }
 }
+
+class Version {
+  static String now = "2.0";
+}

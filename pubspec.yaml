@@ -41,7 +41,8 @@ dependencies:
   bitsdojo_window: ^0.1.5
   path_provider: ^2.0.12
   fl_chart: ^0.60.0
-  dio: ^5.0.0
+  dio: ^5.0.1
+  open_filex: ^4.3.2
 
 dev_dependencies:
   flutter_test:

@@ -189,3 +189,80 @@ class PathFile {
     return r;
   }
 }
+
+class Version {
+  final Dio _dio = Dio();
+
+  String get now => "1.0";
+  String? newer;
+  String? info;
+  String? url;
+
+  static Version? _instance;
+  static Version get instance => _getInstance();
+  static Version _getInstance() {
+    _instance ??= Version._internal();
+    return _instance!;
+  }
+
+  Version._internal();
+
+  bool get update => newer != null && newer != now;
+
+  Future<bool> shouldUpdate() async {
+    if (newer != null) {
+      return now != newer;
+    }
+    try {
+      await Future.delayed(const Duration(seconds: 1));
+      var response = await _dio.get(
+        "https://github.com/yi226/Config/releases/download/speed/update.json",
+      );
+      var data = json.decode(response.data);
+      newer = data["version"];
+      info = data["info"];
+      if (Platform.isAndroid) {
+        url = data["android"];
+      } else if (Platform.isWindows) {
+        url = data["windows"];
+      }
+      return now != newer;
+    } catch (e) {
+      print(e);
+    }
+    newer = now;
+    return false;
+  }
+
+  Future<void> showUpdate(BuildContext context) async {
+    if (newer == null || newer == now) return;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("新版本"),
+          content: SizedBox(
+            height: 150,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("版本号: $newer"),
+                Text("更新内容:\n$info"),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text("取消"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              child: const Text("更新"),
+              onPressed: () {},
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
