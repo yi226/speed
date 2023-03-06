@@ -193,7 +193,7 @@ class PathFile {
 class Version {
   final Dio _dio = Dio();
 
-  String get now => "1.0";
+  String get now => "2.0";
   String? newer;
   String? info;
   String? url;
