@@ -100,6 +100,17 @@ class SettingWidget extends StatelessWidget {
                   controller: global.robotWidthController,
                   inputFormatters: [XNumberTextInputFormatter()],
                 ),
+                const SizedBox(height: 20),
+                ListTile(
+                  title: const Text("更多信息"),
+                  trailing: const Icon(Icons.info),
+                  onTap: () => showAboutDialog(
+                    context: context,
+                    applicationName: "路径规划",
+                    applicationVersion: "2.0",
+                    applicationIcon: const FlutterLogo(),
+                  ),
+                )
               ],
             ),
           ),
