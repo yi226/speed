@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'dart:async';
 
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -193,7 +194,7 @@ class PathFile {
 class Version {
   final Dio _dio = Dio();
 
-  String get now => "2.0";
+  String get now => "1.0";
   String? newer;
   String? info;
   String? url;
@@ -226,6 +227,8 @@ class Version {
         url = data["android"];
       } else if (Platform.isWindows) {
         url = data["windows"];
+      } else if (Platform.isLinux) {
+        url = data["linux"];
       }
       if (url != null) {
         name = url!.split('/').last;
@@ -276,6 +279,9 @@ class Version {
                     if (value == 1) {
                       OpenFilex.open(path);
                       percent.dispose();
+                      if (IntegratePlatform.isDesktop) {
+                        appWindow.close();
+                      }
                     }
                     return Column(
                       children: [

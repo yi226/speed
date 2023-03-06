@@ -184,21 +184,30 @@ class MainPage extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return Container(
-                          constraints: BoxConstraints.tight(const Size(20, 20)),
-                          child: const CircularProgressIndicator());
+                          constraints: BoxConstraints.tight(const Size(40, 40)),
+                          child: Center(
+                            child: Container(
+                                constraints:
+                                    BoxConstraints.tight(const Size(20, 20)),
+                                child: const CircularProgressIndicator()),
+                          ));
                     }
-                    return snapshot.data == true
-                        ? IconButton(
-                            icon: const Icon(
-                              Icons.new_releases,
-                              color: Colors.redAccent,
-                            ),
-                            onPressed: () =>
-                                Version.instance.showUpdate(context),
-                          )
-                        : const SizedBox(height: 20);
+                    return Container(
+                      constraints: BoxConstraints.tight(const Size(40, 40)),
+                      child: snapshot.data == true
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.new_releases,
+                                color: Colors.redAccent,
+                              ),
+                              onPressed: () =>
+                                  Version.instance.showUpdate(context),
+                            )
+                          : null,
+                    );
                   },
                 ),
+                const SizedBox(height: 10),
                 IconButton(
                   icon: Icon(
                     Icons.info,
