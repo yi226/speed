@@ -1,5 +1,6 @@
 {
     "version": 2,
     "info": "支持旧版本导入",
-    "url-windows": "https://github.com/yi226/speed/releases/download/v2.0/speed.exe"
+    "windows": "https://github.com/yi226/speed/releases/download/v2.0/speed.exe",
+    "android": "https://github.com/yi226/speed/releases/download/v2.0/app-release.apk"
 }
