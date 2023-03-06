@@ -175,5 +175,23 @@ class PathFile {
 }
 
 class Version {
-  static String now = "2.0";
+  String get now => "2.0";
+  String newer = "2.0";
+
+  static Version? _instance;
+  static Version get instance => _getInstance();
+  static Version _getInstance() {
+    _instance ??= Version._internal();
+    return _instance!;
+  }
+
+  Version._internal();
+
+  bool get update => false;
+
+  Future<bool> shouldUpdate() async {
+    return false;
+  }
+
+  Future<void> showUpdate(BuildContext context) async {}
 }

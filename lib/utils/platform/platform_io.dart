@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:speed/utils/point.dart';
 import 'package:flutter/material.dart';
@@ -197,6 +197,7 @@ class Version {
   String? newer;
   String? info;
   String? url;
+  String? name;
 
   static Version? _instance;
   static Version get instance => _getInstance();
@@ -226,12 +227,84 @@ class Version {
       } else if (Platform.isWindows) {
         url = data["windows"];
       }
+      if (url != null) {
+        name = url!.split('/').last;
+      }
       return now != newer;
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
     newer = now;
     return false;
+  }
+
+  Future<void> _showError(BuildContext context, {String? info}) async {
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(info ?? "更新失败"),
+              actions: [
+                ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text("确定"))
+              ],
+            ));
+  }
+
+  Future<void> _updateProcess(BuildContext context) async {
+    if (url == null || name == null) {
+      await _showError(context, info: "该系统暂不支持在线更新");
+      return;
+    }
+    var percent = ValueNotifier<double>(0);
+    BuildContext contextSaved = context;
+    String path = "";
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          contextSaved = context;
+          return AlertDialog(
+            title: const Text("下载中"),
+            content: SizedBox(
+              height: 60,
+              child: ValueListenableBuilder(
+                  valueListenable: percent,
+                  builder: (context, value, child) {
+                    if (value == 1) {
+                      OpenFilex.open(path);
+                      percent.dispose();
+                    }
+                    return Column(
+                      children: [
+                        Text("进度: ${(value * 100).toStringAsFixed(1)}%"),
+                        LinearProgressIndicator(value: value),
+                      ],
+                    );
+                  }),
+            ),
+          );
+        });
+
+    Directory dir = await getApplicationDocumentsDirectory();
+    path = dir.path + Platform.pathSeparator + name!;
+    if (kDebugMode) {
+      print(path);
+    }
+    try {
+      await _dio.download(url!, path, onReceiveProgress: (count, total) {
+        if (total != -1) {
+          percent.value = count / total;
+        }
+      }, options: Options(contentType: "stream"));
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      Navigator.of(contextSaved).pop();
+      // ignore: use_build_context_synchronously
+      _showError(contextSaved, info: e.toString());
+    }
   }
 
   Future<void> showUpdate(BuildContext context) async {
@@ -258,7 +331,10 @@ class Version {
             ),
             ElevatedButton(
               child: const Text("更新"),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pop();
+                _updateProcess(context);
+              },
             ),
           ],
         );
