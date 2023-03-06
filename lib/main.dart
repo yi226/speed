@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:speed/utils/platform/platform.dart';
 import 'package:speed/widgets/control.dart';
 import 'package:speed/widgets/curve.dart';
+import 'package:speed/widgets/info.dart';
 
 import 'global.dart';
 
@@ -183,15 +184,8 @@ class MainPage extends StatelessWidget {
                     Icons.info,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  onPressed: () async {
-                    Info info = Info(appDocDirPath: global.appDocDirPath);
-                    bool? result = await info.showInfo(context);
-                    while (result == true) {
-                      await Future.delayed(const Duration(seconds: 1));
-                      info = Info(appDocDirPath: global.appDocDirPath);
-                      // ignore: use_build_context_synchronously
-                      result = await info.showInfo(context);
-                    }
+                  onPressed: () {
+                    Info().showInfo(context);
                   },
                 ),
                 const SizedBox(height: 10),

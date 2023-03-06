@@ -12,6 +12,7 @@ import 'dart:ui' as ui;
 
 import 'package:speed/widgets/chart.dart';
 import 'package:speed/widgets/curve.dart';
+import 'package:speed/widgets/info.dart';
 import 'package:speed/widgets/setting.dart';
 
 // 规划模式
@@ -94,8 +95,7 @@ class Global extends ChangeNotifier {
     if (firstString == null) {
       await save('First', '1');
       while (context == null) {}
-      Info info = Info(appDocDirPath: appDocDirPath);
-      info.showInfo(context!);
+      Info().showInfo(context!);
     }
     notifyListeners();
   }
