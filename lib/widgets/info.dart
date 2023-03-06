@@ -62,7 +62,19 @@ class Info {
                   )
                 : null,
           ),
-          const SizedBox(width: 80),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: 100,
+            child: ListTile(
+              title: const Text("更多信息"),
+              onTap: () => showAboutDialog(
+                  context: context,
+                  applicationName: "路径规划",
+                  applicationVersion: Version.instance.now,
+                  applicationIcon: const FlutterLogo(),
+                  applicationLegalese: "开发者: 易鹏飞, 李思宇"),
+            ),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
