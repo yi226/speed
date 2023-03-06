@@ -175,8 +175,8 @@ class PathFile {
 }
 
 class Version {
-  String get now => "2.0";
-  String newer = "2.0";
+  String get now => "2.1";
+  String newer = "2.1";
 
   static Version? _instance;
   static Version get instance => _getInstance();
